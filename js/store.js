@@ -1,0 +1,209 @@
+// Armazenamento local. Toda a leitura e escrita de dados passa por aqui —
+// assim, acrescentar sincronização na nuvem mais tarde mexe só neste ficheiro.
+
+import { ALIMENTOS_BASE } from './data/alimentos.js';
+import { ALVOS_PADRAO } from './data/plano.js';
+
+const CHAVE = 'treino10k.v1';
+
+const ESTADO_INICIAL = {
+  versao: 1,
+  alvos: { ...ALVOS_PADRAO },
+  treinos: {},    // "2026-09-23": { feito, distanciaKm, tempoMin, esforco, dorCanela, notas }
+  pesos: {},      // "2026-09-21": 95.2
+  alimentos: [],  // { id, nome, kcal, p, h, g, cat }
+  diario: {},     // "2026-09-21": [ { id, alimentoId, gramas, refeicao } ]
+};
+
+let estado = carregar();
+const ouvintes = new Set();
+
+function carregar() {
+  try {
+    const bruto = localStorage.getItem(CHAVE);
+    if (!bruto) return semear({ ...ESTADO_INICIAL });
+    const guardado = JSON.parse(bruto);
+    return { ...ESTADO_INICIAL, ...guardado, alvos: { ...ALVOS_PADRAO, ...(guardado.alvos || {}) } };
+  } catch {
+    return semear({ ...ESTADO_INICIAL });
+  }
+}
+
+function semear(base) {
+  base.alimentos = ALIMENTOS_BASE.map((a, i) => ({ id: `base-${i}`, ...a }));
+  return base;
+}
+
+function gravar() {
+  try {
+    localStorage.setItem(CHAVE, JSON.stringify(estado));
+  } catch (e) {
+    alert('Não foi possível guardar. O armazenamento do browser pode estar cheio.');
+  }
+  ouvintes.forEach((fn) => fn(estado));
+}
+
+export function obter() {
+  return estado;
+}
+
+export function subscrever(fn) {
+  ouvintes.add(fn);
+  return () => ouvintes.delete(fn);
+}
+
+export function actualizar(mutador) {
+  mutador(estado);
+  gravar();
+}
+
+// ---- Definições ----
+
+export function guardarAlvos(novos) {
+  actualizar((e) => {
+    e.alvos = { ...e.alvos, ...novos, configurado: true };
+  });
+}
+
+/** Alvos estimados a partir das medidas. Mifflin-St Jeor + factor de actividade. */
+export function calcularAlvos({ peso, altura, idade, sexo, actividade, defice }) {
+  const tmb = 10 * peso + 6.25 * altura - 5 * idade + (sexo === 'm' ? 5 : -161);
+  const manutencao = tmb * actividade;
+  const kcal = Math.round((manutencao - defice) / 10) * 10;
+  const proteina = Math.round(peso * 1.6);
+  const gordura = Math.round(peso * 0.65);
+  const hidratos = Math.max(0, Math.round((kcal - proteina * 4 - gordura * 9) / 4));
+  return { tmb: Math.round(tmb), manutencao: Math.round(manutencao), kcal, proteina, hidratos, gordura };
+}
+
+// ---- Treinos ----
+
+export function registarTreino(data, dados) {
+  actualizar((e) => {
+    e.treinos[data] = { ...(e.treinos[data] || {}), ...dados };
+  });
+}
+
+export function apagarTreino(data) {
+  actualizar((e) => { delete e.treinos[data]; });
+}
+
+// ---- Peso ----
+
+export function registarPeso(data, kg) {
+  actualizar((e) => {
+    if (kg === null || kg === '' || Number.isNaN(Number(kg))) delete e.pesos[data];
+    else e.pesos[data] = Number(kg);
+  });
+}
+
+/** Média dos pesos registados na semana que contém `data` (segunda a domingo). */
+export function mediaSemanal(data) {
+  const d = new Date(data + 'T12:00:00');
+  const diaSemana = (d.getDay() + 6) % 7; // 0 = segunda
+  const segunda = new Date(d);
+  segunda.setDate(d.getDate() - diaSemana);
+
+  const valores = [];
+  for (let i = 0; i < 7; i++) {
+    const dia = new Date(segunda);
+    dia.setDate(segunda.getDate() + i);
+    const v = estado.pesos[isoData(dia)];
+    if (typeof v === 'number') valores.push(v);
+  }
+  if (!valores.length) return null;
+  return { media: valores.reduce((a, b) => a + b, 0) / valores.length, n: valores.length };
+}
+
+// ---- Alimentos ----
+
+export function adicionarAlimento(alimento) {
+  const id = `u-${Date.now()}`;
+  actualizar((e) => { e.alimentos.push({ id, ...alimento }); });
+  return id;
+}
+
+export function apagarAlimento(id) {
+  actualizar((e) => {
+    e.alimentos = e.alimentos.filter((a) => a.id !== id);
+  });
+}
+
+export function alimentoPorId(id) {
+  return estado.alimentos.find((a) => a.id === id);
+}
+
+// ---- Diário alimentar ----
+
+export function adicionarAoDiario(data, entrada) {
+  actualizar((e) => {
+    if (!e.diario[data]) e.diario[data] = [];
+    e.diario[data].push({ id: `d-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, ...entrada });
+  });
+}
+
+export function removerDoDiario(data, id) {
+  actualizar((e) => {
+    e.diario[data] = (e.diario[data] || []).filter((x) => x.id !== id);
+  });
+}
+
+/** Soma dos macros de um dia. */
+export function totaisDoDia(data) {
+  const linhas = estado.diario[data] || [];
+  return linhas.reduce(
+    (acc, linha) => {
+      const a = alimentoPorId(linha.alimentoId);
+      if (!a) return acc;
+      const f = linha.gramas / 100;
+      acc.kcal += a.kcal * f;
+      acc.p += a.p * f;
+      acc.h += a.h * f;
+      acc.g += a.g * f;
+      return acc;
+    },
+    { kcal: 0, p: 0, h: 0, g: 0 }
+  );
+}
+
+// ---- Cópia de segurança ----
+
+export function exportar() {
+  const blob = new Blob([JSON.stringify(estado, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `treino10k-backup-${isoData(new Date())}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+export function importar(texto) {
+  const dados = JSON.parse(texto);
+  if (!dados || typeof dados !== 'object' || !('versao' in dados)) {
+    throw new Error('Este ficheiro não parece ser uma cópia de segurança da app.');
+  }
+  estado = { ...ESTADO_INICIAL, ...dados };
+  gravar();
+}
+
+// ---- Utilitários de data ----
+
+export function isoData(d = new Date()) {
+  const ano = d.getFullYear();
+  const mes = String(d.getMonth() + 1).padStart(2, '0');
+  const dia = String(d.getDate()).padStart(2, '0');
+  return `${ano}-${mes}-${dia}`;
+}
+
+export function dataLegivel(iso) {
+  const d = new Date(iso + 'T12:00:00');
+  const dias = ['domingo', 'segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado'];
+  const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+  return `${dias[d.getDay()]}, ${d.getDate()} ${meses[d.getMonth()]}`;
+}
+
+export function diaCurto(iso) {
+  const d = new Date(iso + 'T12:00:00');
+  return ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'][d.getDay()];
+}

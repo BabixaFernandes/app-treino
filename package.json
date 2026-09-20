@@ -1,0 +1,10 @@
+{
+  "name": "app-treino-10k",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Plano de treino, peso e calorias para os 10 km de 8 de Novembro de 2026.",
+  "scripts": {
+    "start": "node servidor.js"
+  }
+}

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0f1115">
+  <title>10K — 8 Nov</title>
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./icone.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="./icone.svg">
+  <link rel="stylesheet" href="./app.css">
+</head>
+<body>
+  <header>
+    <h1 id="titulo">Treinos</h1>
+    <div class="acoes">
+      <button id="definicoes" title="Definições" aria-label="Definições">⚙</button>
+      <button id="exportar" title="Guardar cópia de segurança" aria-label="Guardar cópia de segurança">⤓</button>
+      <label class="botao-ficheiro" title="Restaurar cópia de segurança">
+        ⤒<input type="file" id="importar" accept="application/json" hidden>
+      </label>
+    </div>
+  </header>
+
+  <main id="vista"></main>
+
+  <nav class="tabs">
+    <button class="tab" data-vista="treinos"><span class="ic">🏃</span>Treinos</button>
+    <button class="tab" data-vista="peso"><span class="ic">⚖️</span>Peso</button>
+    <button class="tab" data-vista="comida"><span class="ic">🍽️</span>Comida</button>
+  </nav>
+
+  <script type="module" src="./js/app.js"></script>
+</body>
+</html>

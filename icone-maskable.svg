@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" fill="#0f1115"/>
+  <circle cx="256" cy="256" r="128" fill="none" stroke="#212530" stroke-width="26"/>
+  <circle cx="256" cy="256" r="128" fill="none" stroke="#4f9dff" stroke-width="26"
+          stroke-linecap="round" stroke-dasharray="804" stroke-dashoffset="250"
+          transform="rotate(-90 256 256)"/>
+  <text x="256" y="254" text-anchor="middle" font-family="system-ui, sans-serif"
+        font-size="96" font-weight="700" fill="#e8eaf0">10</text>
+  <text x="256" y="306" text-anchor="middle" font-family="system-ui, sans-serif"
+        font-size="44" font-weight="600" fill="#969db0" letter-spacing="4">KM</text>
+</svg>

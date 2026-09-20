@@ -1,0 +1,16 @@
+{
+  "name": "10K — 8 de Novembro",
+  "short_name": "10K",
+  "description": "Plano de treino, peso e calorias para os 10 km de 8 de Novembro.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0f1115",
+  "theme_color": "#0f1115",
+  "lang": "pt-PT",
+  "icons": [
+    { "src": "./icone.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "./icone-maskable.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}
