@@ -134,7 +134,14 @@ nas definições. São dados teus, por isso ficam no dispositivo e não no códi
 
 ## Balanço da semana
 
-Quando uma semana acaba, aparece no topo dela um balanço: sessões feitas, a longa, o ritmo
+Aparece no topo da semana **a decorrer** — *"Semana 1, até agora"* — e fica lá como balanço
+fechado quando a semana acaba. Nas semanas futuras não aparece nada.
+
+Numa semana a meio só contam os dias que já passaram, e uma sessão só falta depois de o dia
+acabar: a de hoje ainda está a tempo. É de propósito que aparece antes do fim — saber à quarta
+que a corrida de terça saiu rápida dá tempo de corrigir; saber na segunda seguinte não dá nada.
+
+O que mostra: sessões feitas, a longa, o ritmo
 médio das corridas fáceis, registos de dor na canela, a média do peso contra a da semana
 anterior, e a média de calorias e proteína dos dias registados.
 

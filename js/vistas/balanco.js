@@ -2,7 +2,6 @@
 // do próprio plano aplicadas aos registos dela. O que a app não conseguir dizer,
 // o botão de copiar manda para uma conversa a sério.
 
-import { TIPO_INFO } from '../data/plano.js';
 import { obter, mediaSemanal, totaisDoDia, somaDias, diaCurto, dataLegivel } from '../store.js';
 
 // O ritmo fácil do plano é 8:15-8:45/km, e correr mais rápido do que isso é o erro
@@ -21,13 +20,21 @@ function diasEntre(inicio, fim) {
   return dias;
 }
 
-export function calcularBalanco(semana, sessoes, fim) {
+export function calcularBalanco(semana, sessoes, fim, hoje) {
   const e = obter();
   const reg = (s) => e.treinos[s.id] || {};
 
-  const treinaveis = sessoes.filter((s) => s.tipo !== 'descanso');
+  // Numa semana a decorrer só se contam os dias que já passaram — dizer "2 de 5"
+  // à terça-feira seria uma acusação, não um balanço.
+  const emCurso = fim >= hoje;
+  const ate = emCurso ? hoje : fim;
+
+  // Uma sessão só falta depois de o dia acabar. A de hoje ainda está a tempo.
+  const limiteFalta = emCurso ? hoje : somaDias(fim, 1);
+
+  const treinaveis = sessoes.filter((s) => s.tipo !== 'descanso' && s.data <= ate);
   const feitas = treinaveis.filter((s) => reg(s).feito);
-  const faltaram = treinaveis.filter((s) => !reg(s).feito);
+  const faltaram = treinaveis.filter((s) => !reg(s).feito && s.data < limiteFalta);
   const canela = treinaveis.filter((s) => reg(s).dorCanela);
 
   const longa = sessoes.find((s) => s.tipo === 'longa' || s.tipo === 'prova');
@@ -45,7 +52,7 @@ export function calcularBalanco(semana, sessoes, fim) {
   const peso = mediaSemanal(semana.inicio);
   const pesoAnterior = mediaSemanal(somaDias(semana.inicio, -7));
 
-  const dias = diasEntre(semana.inicio, fim);
+  const dias = diasEntre(semana.inicio, ate);
   const comidos = dias.filter((d) => (e.diario[d] || []).length);
   const totais = comidos.map((d) => totaisDoDia(d));
   const comida = {
@@ -56,7 +63,7 @@ export function calcularBalanco(semana, sessoes, fim) {
   };
 
   return {
-    semana, fim, treinaveis, feitas, faltaram, canela,
+    semana, fim, hoje, emCurso, treinaveis, feitas, faltaram, canela,
     longa, longaReg, ritmoFacil, peso, pesoAnterior, comida, alvos: e.alvos,
   };
 }
@@ -74,7 +81,8 @@ function veredictos(b) {
     });
   }
 
-  if (b.longa && !b.longaReg?.feito) {
+  // Só é falta depois de o dia passar. Numa semana a decorrer, a longa ainda vem a caminho.
+  if (b.longa && b.longa.data < b.hoje && !b.longaReg?.feito) {
     msgs.push({
       tom: 'mau',
       texto: 'A corrida longa não ficou feita. É a única sessão da semana que não se salta — '
@@ -111,10 +119,17 @@ function veredictos(b) {
   }
 
   if (!msgs.length) {
-    const partes = ['Semana no sítio'];
-    if (b.longaReg?.feito) partes.push('a longa feita');
-    if (b.ritmoFacil) partes.push(`as fáceis a ${ritmo(b.ritmoFacil)}`);
-    msgs.push({ tom: 'bom', texto: `${partes.join(', ')}. Sem nada a corrigir — continua.` });
+    if (!b.treinaveis.length) {
+      msgs.push({ tom: 'bom', texto: 'A semana ainda não tem sessões para avaliar. Volta aqui depois do primeiro treino.' });
+    } else {
+      const partes = [b.emCurso ? 'Por agora, tudo no sítio' : 'Semana no sítio'];
+      if (b.longaReg?.feito) partes.push('a longa feita');
+      if (b.ritmoFacil) partes.push(`as fáceis a ${ritmo(b.ritmoFacil)}`);
+      msgs.push({
+        tom: 'bom',
+        texto: `${partes.join(', ')}. ${b.emCurso ? 'Continua assim o resto da semana.' : 'Sem nada a corrigir — continua.'}`,
+      });
+    }
   }
 
   return msgs.slice(0, 2);
@@ -122,7 +137,10 @@ function veredictos(b) {
 
 function linhaLonga(b) {
   if (!b.longa) return null;
-  if (!b.longaReg?.feito) return 'não feita';
+  if (!b.longaReg?.feito) {
+    if (b.longa.data > b.hoje) return `${diaCurto(b.longa.data)} ${Number(b.longa.data.slice(8))} — ainda por fazer`;
+    return 'não feita';
+  }
   const p = [];
   if (b.longaReg.distanciaKm) p.push(`${num(b.longaReg.distanciaKm)} km`);
   if (b.longaReg.tempoMin) p.push(`${b.longaReg.tempoMin} min`);
@@ -149,7 +167,12 @@ function linhaComida(b) {
 }
 
 const linhas = (b) => [
-  ['Sessões', `${b.feitas.length} de ${b.treinaveis.length}${b.faltaram.length ? ` — faltou ${b.faltaram.map((s) => TIPO_INFO[s.tipo].label.toLowerCase()).join(', ')}` : ''}`],
+  ['Sessões', b.treinaveis.length
+    ? `${b.feitas.length} de ${b.treinaveis.length}${b.emCurso ? ' até hoje' : ''}`
+      + (b.faltaram.length
+        ? ` — faltou ${b.faltaram.map((s) => `${diaCurto(s.data)} ${Number(s.data.slice(8))}`).join(', ')}`
+        : '')
+    : 'a semana ainda não começou a contar'],
   ['A longa', linhaLonga(b)],
   ['Ritmo fácil', b.ritmoFacil ? ritmo(b.ritmoFacil) : 'sem distância e tempo registados'],
   ['Canela', b.canela.length ? `${b.canela.length} ${b.canela.length === 1 ? 'registo' : 'registos'} de dor` : 'sem registos'],
@@ -157,15 +180,15 @@ const linhas = (b) => [
   ['Comida', linhaComida(b)],
 ].filter(([, v]) => v !== null);
 
-/** Só aparece depois de a semana acabar. */
+/** Aparece na semana a decorrer e nas que já passaram — nunca nas futuras. */
 export function balancoHTML(semana, sessoes, fim, hoje) {
-  if (fim >= hoje) return '';
-  const b = calcularBalanco(semana, sessoes, fim);
+  if (semana.inicio > hoje) return '';
+  const b = calcularBalanco(semana, sessoes, fim, hoje);
 
   return `
-    <div class="balanco">
+    <div class="balanco ${b.emCurso ? 'em-curso' : ''}">
       <div class="balanco-topo">
-        <h5>Balanço da semana ${semana.semana}</h5>
+        <h5>${b.emCurso ? `Semana ${semana.semana}, até agora` : `Balanço da semana ${semana.semana}`}</h5>
         <button type="button" class="copiar-balanco" data-balanco="${semana.semana}">Copiar</button>
       </div>
       <dl>
@@ -177,13 +200,14 @@ export function balancoHTML(semana, sessoes, fim, hoje) {
 }
 
 /** A mesma coisa em texto, para colar numa conversa e pedir uma leitura a sério. */
-export function balancoTexto(semana, sessoes, fim) {
-  const b = calcularBalanco(semana, sessoes, fim);
+export function balancoTexto(semana, sessoes, fim, hoje) {
+  const b = calcularBalanco(semana, sessoes, fim, hoje);
   const alvos = b.alvos;
 
   return [
     `Balanço da semana ${semana.semana} do meu plano de 10 km (${dataLegivel(semana.inicio)} a ${dataLegivel(fim)}).`,
     `Semana: "${semana.titulo}".`,
+    b.emCurso ? `A semana ainda vai a meio — hoje é ${dataLegivel(hoje)}.` : null,
     '',
     ...linhas(b).map(([k, v]) => `- ${k}: ${v}`),
     '',
@@ -191,7 +215,9 @@ export function balancoTexto(semana, sessoes, fim) {
     ...sessoes.map((s) => {
       const r = obter().treinos[s.id] || {};
       const det = [];
-      if (r.feito) det.push('feita'); else if (s.tipo !== 'descanso') det.push('não feita');
+      if (r.feito) det.push('feita');
+      else if (s.tipo === 'descanso') { /* nada a dizer */ }
+      else det.push(s.data > hoje ? 'ainda por fazer' : 'não feita');
       if (r.distanciaKm) det.push(`${num(r.distanciaKm)} km`);
       if (r.tempoMin) det.push(`${r.tempoMin} min`);
       if (r.distanciaKm && r.tempoMin) det.push(ritmo((r.tempoMin * 60) / r.distanciaKm));
@@ -202,6 +228,8 @@ export function balancoTexto(semana, sessoes, fim) {
     }),
     '',
     `Alvos: ${alvos.kcal} kcal, ${alvos.proteina} g de proteína, ritmo fácil 8:15-8:45/km.`,
-    'Diz-me o que ler nisto e o que mudar na próxima semana.',
-  ].join('\n');
+    b.emCurso
+      ? 'Diz-me o que ler nisto e o que ajustar no resto da semana.'
+      : 'Diz-me o que ler nisto e o que mudar na próxima semana.',
+  ].filter((l) => l !== null).join('\n');
 }

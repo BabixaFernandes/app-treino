@@ -196,7 +196,7 @@ export function renderTreinos(raiz) {
   raiz.querySelectorAll('[data-balanco]').forEach((el) => {
     el.addEventListener('click', async () => {
       const semana = PLANO.find((s) => s.semana === Number(el.dataset.balanco));
-      const texto = balancoTexto(semana, sessoesDaSemana(semana), fimDaSemana(semana));
+      const texto = balancoTexto(semana, sessoesDaSemana(semana), fimDaSemana(semana), isoData());
       try {
         await navigator.clipboard.writeText(texto);
         el.textContent = 'Copiado ✓';
