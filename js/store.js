@@ -289,6 +289,12 @@ export function isoData(d = new Date()) {
   return `${ano}-${mes}-${dia}`;
 }
 
+export function somaDias(iso, n) {
+  const d = new Date(iso + 'T12:00:00');
+  d.setDate(d.getDate() + n);
+  return isoData(d);
+}
+
 export function dataLegivel(iso) {
   const d = new Date(iso + 'T12:00:00');
   const dias = ['domingo', 'segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado'];

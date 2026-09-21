@@ -1,4 +1,5 @@
 import { PLANO, TIPO_INFO, RITMOS } from '../data/plano.js';
+import { balancoHTML, balancoTexto } from './balanco.js';
 import {
   obter, registarTreino, isoData, diaCurto, dataLegivel,
   dataEfectiva, moverSessao, reporSemana, definirModoRitmo,
@@ -192,6 +193,21 @@ export function renderTreinos(raiz) {
     el.addEventListener('click', () => abrirEdicao(null, Number(el.dataset.nova), raiz));
   });
 
+  raiz.querySelectorAll('[data-balanco]').forEach((el) => {
+    el.addEventListener('click', async () => {
+      const semana = PLANO.find((s) => s.semana === Number(el.dataset.balanco));
+      const texto = balancoTexto(semana, sessoesDaSemana(semana), fimDaSemana(semana));
+      try {
+        await navigator.clipboard.writeText(texto);
+        el.textContent = 'Copiado ✓';
+        setTimeout(() => { el.textContent = 'Copiar'; }, 2000);
+      } catch {
+        // Sem permissão para a área de transferência — mostra o texto para copiar à mão.
+        mostrarTexto(texto);
+      }
+    });
+  });
+
   raiz.querySelectorAll('[data-repor]').forEach((el) => {
     el.addEventListener('click', async () => {
       const semana = PLANO.find((s) => s.semana === Number(el.dataset.repor));
@@ -367,6 +383,7 @@ function semanaHTML(s, estado, hoje, pt) {
             <button type="button" data-repor="${s.semana}">repor o plano original</button>
           </p>` : ''}
         ${aviso ? `<p class="nota aviso-semana">⚠ ${aviso}</p>` : ''}
+        ${balancoHTML(s, lista, fimDaSemana(s), hoje)}
         ${lista.map((x) => sessaoHTML(x, estado, hoje, s.semana, pt)).join('')}
         ${lista.length ? '' : '<p class="legenda vazia-semana">Semana sem sessões.</p>'}
         <button type="button" class="nova-sessao" data-nova="${s.semana}">+ Acrescentar sessão</button>
@@ -468,6 +485,25 @@ function tabelaRitmos() {
       <p class="nota">Inclinação sempre a 1%, nunca 0%. E não te agarres aos corrimãos.</p>
     </details>
   `;
+}
+
+/** Plano B da cópia: o texto num campo já selecionado, para copiar à mão. */
+function mostrarTexto(texto) {
+  const d = document.createElement('dialog');
+  d.className = 'modal';
+  d.innerHTML = `
+    <form method="dialog">
+      <h3>Copiar o balanço</h3>
+      <p class="sub">O telemóvel não deixou copiar automaticamente. Está aqui, selecionado.</p>
+      <textarea rows="10" class="texto-balanco"></textarea>
+      <div class="botoes um"><button value="fechar" class="primario">Fechar</button></div>
+    </form>`;
+  document.body.appendChild(d);
+  const campo = d.querySelector('textarea');
+  campo.value = texto;
+  d.showModal();
+  campo.select();
+  d.addEventListener('close', () => d.remove());
 }
 
 /** Confirmação feita com o diálogo da app. O `confirm()` do browser não é de

@@ -166,6 +166,40 @@ main { padding: 16px; max-width: 640px; margin: 0 auto; }
 }
 .nota.aviso-semana { color: var(--laranja); border-left-color: var(--laranja); }
 .vazia-semana { text-align: center; margin: 4px 0 10px; }
+
+/* ---- Balanço da semana ---- */
+.balanco {
+  background: var(--superficie); border: 1px solid var(--borda);
+  border-left: 3px solid var(--primaria);
+  border-radius: 10px; padding: 13px 14px; margin-bottom: 12px;
+}
+.balanco-topo { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.balanco h5 {
+  margin: 0; font-size: .68rem; text-transform: uppercase;
+  letter-spacing: .07em; color: var(--texto-fraco);
+}
+.copiar-balanco {
+  background: var(--superficie-2); border: 1px solid var(--borda); color: var(--texto);
+  font-family: inherit; font-size: .72rem; font-weight: 600;
+  padding: 5px 10px; border-radius: 8px; cursor: pointer; flex: none;
+}
+.copiar-balanco:active { background: var(--primaria); color: #06121f; }
+.balanco dl { margin: 10px 0 0; }
+.balanco dl > div {
+  display: flex; gap: 10px; padding: 5px 0;
+  border-bottom: 1px solid var(--borda); font-size: .8rem;
+}
+.balanco dl > div:last-child { border-bottom: none; }
+.balanco dt { color: var(--texto-fraco); min-width: 84px; flex: none; }
+.balanco dd { margin: 0; font-weight: 600; }
+.recado {
+  margin: 10px 0 0; font-size: .8rem; line-height: 1.45;
+  padding-left: 10px; border-left: 2px solid var(--borda);
+}
+.recado.bom { color: var(--verde); border-left-color: var(--verde); }
+.recado.aviso { color: var(--laranja); border-left-color: var(--laranja); }
+.recado.mau { color: var(--vermelho); border-left-color: var(--vermelho); }
+.texto-balanco { font-size: .8rem !important; font-family: ui-monospace, monospace !important; }
 .nova-sessao {
   width: 100%; background: none; border: 1px dashed var(--borda);
   color: var(--texto-fraco); border-radius: 10px; padding: 11px;

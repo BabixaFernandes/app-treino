@@ -132,6 +132,27 @@ Duas regras que não são óbvias:
 O tamanho do pacote e quantos PT já tinhas feito antes de o plano começar definem-se
 nas definições. São dados teus, por isso ficam no dispositivo e não no código.
 
+## Balanço da semana
+
+Quando uma semana acaba, aparece no topo dela um balanço: sessões feitas, a longa, o ritmo
+médio das corridas fáceis, registos de dor na canela, a média do peso contra a da semana
+anterior, e a média de calorias e proteína dos dias registados.
+
+Por baixo vêm **no máximo dois recados**, por esta ordem de prioridade:
+
+1. **Dor na canela** — passa à frente de tudo, com a regra de paragem do plano.
+2. **A longa não feita** — a única sessão que não se salta.
+3. **Fáceis corridas depressa de mais** — acima de 8:05/km, ou seja o limite de 8:15 com
+   10 s de tolerância, para o aviso não disparar por causa do GPS.
+4. **A média do peso parada** face aos −0,4 kg/semana.
+5. **Proteína abaixo de 90% do alvo** — e só com 5 ou mais dias registados; com menos,
+   diz que não tem dados em vez de tirar conclusões.
+
+Não há modelo nenhum por trás disto: são as regras do plano aplicadas aos registos, e corre
+offline como o resto da app. Para uma leitura a sério há o botão **Copiar**, que põe a semana
+inteira em texto — sessão por sessão — para colar numa conversa com o Claude e pedir o que
+umas regras não conseguem dar. Se o telemóvel não deixar copiar, abre o texto já selecionado.
+
 ## Cópias de segurança
 
 Os dados ficam guardados no próprio dispositivo (`localStorage`), não numa nuvem. Isto quer dizer:
@@ -165,6 +186,7 @@ js/
   vistas/peso.js        separador Peso
   vistas/comida.js      separador Comida
   vistas/definicoes.js  alvos e calculadora de calorias
+  vistas/balanco.js     balanço de uma semana terminada
 ```
 
 Nenhum dado pessoal está no código. Peso, altura, idade e alvos são introduzidos na app
