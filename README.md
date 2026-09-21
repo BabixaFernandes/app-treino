@@ -170,7 +170,7 @@ que a corrida de terça saiu rápida dá tempo de corrigir; saber na segunda seg
 
 O que mostra: sessões feitas, a longa, o ritmo
 médio das corridas fáceis, registos de dor na canela, a média do peso contra a da semana
-anterior, e a média de calorias e proteína dos dias registados.
+anterior, a média de calorias e proteína dos dias registados, e a média de água.
 
 **Os números estão colapsados; o recado não.** Colapsar tudo mataria a razão de existir — era
 preciso abrir o cartão para descobrir que valia a pena abri-lo. Assim uma semana boa ocupa duas
@@ -185,6 +185,14 @@ Vêm **no máximo dois recados**, por esta ordem de prioridade:
 4. **A média do peso parada** face aos −0,4 kg/semana.
 5. **Proteína abaixo de 90% do alvo** — e só com 5 ou mais dias registados; com menos,
    diz que não tem dados em vez de tirar conclusões.
+6. **Dias de treino com pouca água** — dois ou mais dias com treino abaixo de 80% do alvo
+   daquele dia, e só com 4 ou mais dias de água registados. É o último da lista de propósito:
+   sendo o recado menos grave, só chega à superfície numa semana em que não há canela, longa
+   falhada nem proteína em falta — que é exactamente quando vale a pena lê-lo. Nos dias de
+   descanso não conta, porque uma garrafa a menos num sábado parado não muda nada.
+
+Um recado que não passa o corte **não desaparece**: o número fica sempre na lista colapsada e no
+texto do botão *Copiar*. O limite de dois é sobre o que grita, não sobre o que se sabe.
 
 Não há modelo nenhum por trás disto: são as regras do plano aplicadas aos registos, e corre
 offline como o resto da app. Para uma leitura a sério há o botão **Copiar**, que põe a semana

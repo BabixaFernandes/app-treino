@@ -19,8 +19,15 @@ const FACIL_RAPIDO_DE_MAIS = 485;
 const PERDA_SEMANAL_ALVO = 0.4;
 const MINIMO_DIAS_COMIDA = 5;
 
+// A água é o último recado da lista, por isso só vale a pena dizer algo quando há
+// dias suficientes para não ser ruído — e a falha que interessa é nos dias de treino.
+const MINIMO_DIAS_AGUA = 4;
+const AGUA_BAIXA = 0.8;
+const DIAS_TREINO_SECOS = 2;
+
 const ritmo = (seg) => `${Math.floor(seg / 60)}:${String(Math.round(seg % 60)).padStart(2, '0')}/km`;
 const num = (v, casas = 1) => v.toFixed(casas).replace('.', ',');
+const litros = (ml) => `${(ml / 1000).toFixed(1).replace('.', ',')} L`;
 
 function diasEntre(inicio, fim) {
   const dias = [];
@@ -72,13 +79,25 @@ export function calcularBalanco(semana, sessoes, fim, hoje) {
     proteina: totais.length ? totais.reduce((a, t) => a + t.p, 0) / totais.length : null,
   };
 
+  // A água tem alvo por dia, e não um alvo fixo: um dia de treino pede mais. Comparar
+  // tudo contra o mesmo número dava semanas "no sítio" que secaram os dias que contam.
+  const comTreino = (d) => sessoes.some((s) => s.data === d && s.tipo !== 'descanso');
+  const alvoDia = (d) => (e.alvos.aguaMl || 0) + (comTreino(d) ? (e.alvos.aguaExtraTreino || 0) : 0);
+  const aguaDias = dias.filter((d) => e.agua[d] !== undefined);
+  const agua = {
+    dias: aguaDias.length,
+    deDias: dias.length,
+    media: aguaDias.length ? aguaDias.reduce((a, d) => a + e.agua[d], 0) / aguaDias.length : null,
+    secos: aguaDias.filter((d) => comTreino(d) && e.agua[d] < alvoDia(d) * AGUA_BAIXA),
+  };
+
   // As fases por que a semana passou, e os dias que ela marcou como fortes.
   const fases = [...new Set(dias.map((d) => faseDe(d)?.label).filter(Boolean))];
   const fortes = sintomasFortes(semana.inicio, ate);
 
   return {
     semana, fim, hoje, emCurso, treinaveis, feitas, faltaram, canela,
-    longa, longaReg, ritmoFacil, peso, pesoAnterior, comida, fases, fortes, alvos: e.alvos,
+    longa, longaReg, ritmoFacil, peso, pesoAnterior, comida, agua, fases, fortes, alvos: e.alvos,
   };
 }
 
@@ -142,6 +161,18 @@ function veredictos(b) {
     });
   }
 
+  // Último da lista de propósito: é o recado menos grave dos sete, por isso só chega
+  // à superfície numa semana em que não há canela, longa falhada nem proteína em falta
+  // — que é exactamente quando vale a pena lê-lo.
+  if (b.agua.dias >= MINIMO_DIAS_AGUA && b.agua.secos.length >= DIAS_TREINO_SECOS) {
+    msgs.push({
+      tom: 'aviso',
+      texto: `${b.agua.secos.length} dias de treino com pouca água (${b.agua.secos.map((d) => `${diaCurto(d)} ${Number(d.slice(8))}`).join(', ')}), `
+        + `numa média de ${litros(b.agua.media)} na semana. Desidratada, o mesmo treino sai com mais esforço percebido `
+        + 'e pulsação mais alta — não é falta de forma, é só água a menos.',
+    });
+  }
+
   if (!msgs.length) {
     if (!b.treinaveis.length) {
       msgs.push({ tom: 'bom', texto: 'A semana ainda não tem sessões para avaliar. Volta aqui depois do primeiro treino.' });
@@ -202,8 +233,16 @@ const linhas = (b) => [
   ['Canela', b.canela.length ? `${b.canela.length} ${b.canela.length === 1 ? 'registo' : 'registos'} de dor` : 'sem registos'],
   ['Peso', linhaPeso(b)],
   ['Comida', linhaComida(b)],
+  ['Água', linhaAgua(b)],
   ['Ciclo', linhaCiclo(b)],
 ].filter(([, v]) => v !== null);
+
+function linhaAgua(b) {
+  if (!b.agua.dias) return 'nenhum dia registado';
+  const base = `média ${litros(b.agua.media)} · ${b.agua.dias} de ${b.agua.deDias} dias registados`;
+  if (!b.agua.secos.length) return base;
+  return `${base} · ${b.agua.secos.length} ${b.agua.secos.length === 1 ? 'dia' : 'dias'} de treino com pouca`;
+}
 
 function linhaCiclo(b) {
   if (!b.fases.length) return null;
@@ -262,7 +301,8 @@ export function balancoTexto(semana, sessoes, fim, hoje) {
       return `- ${diaCurto(s.data)} ${Number(s.data.slice(8))} · ${s.titulo}${det.length ? ` — ${det.join(' · ')}` : ''}`;
     }),
     '',
-    `Alvos: ${alvos.kcal} kcal, ${alvos.proteina} g de proteína, ritmo fácil 8:15-8:45/km.`,
+    `Alvos: ${alvos.kcal} kcal, ${alvos.proteina} g de proteína, ritmo fácil 8:15-8:45/km, `
+      + `água ${litros(alvos.aguaMl || 0)} (${litros((alvos.aguaMl || 0) + (alvos.aguaExtraTreino || 0))} nos dias de treino).`,
     b.emCurso
       ? 'Diz-me o que ler nisto e o que ajustar no resto da semana.'
       : 'Diz-me o que ler nisto e o que mudar na próxima semana.',
