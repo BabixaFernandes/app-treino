@@ -11,6 +11,9 @@ por isso só aparece depois de esse tempo estar lá.
 É uma PWA: um site que o Android guarda no ecrã inicial com ícone próprio, abre em ecrã
 inteiro sem barra do browser e funciona sem internet.
 
+O plano vai de **21 de Setembro a 31 de Dezembro de 2026**: sete semanas até à primeira prova,
+cinco de trabalho de ritmo até à segunda, e depois só os dias de PT até ao fim do ano.
+
 ## Ver a app no PC
 
 ```

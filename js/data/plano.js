@@ -227,6 +227,168 @@ export const PLANO = [
       },
     ],
   },
+
+  // ---- Segundo bloco: 9 de Novembro a 13 de Dezembro ----
+  // A distância já está resolvida. Estas cinco semanas são sobre tempo.
+  {
+    semana: 8,
+    inicio: '2026-11-09',
+    titulo: 'Recuperação',
+    nota: 'Uma prova de 10 km cobra-se. Esta semana só tem as duas corridas fáceis — nada de intervalos, nada de longa a sério. A forma de Dezembro constrói-se em cima de pernas descansadas, não de pernas teimosas.',
+    sessoes: [
+      PT('2026-11-09'),
+      {
+        data: '2026-11-10', tipo: 'facil', titulo: 'Corrida fácil — 25 min',
+        duracaoMin: 25,
+        detalhe: 'Muito fácil. Se as pernas ainda estiverem pesadas da prova, caminha os 25 min e não penses mais nisso.',
+        passadeira: '5 min a 6,0 · 25 min a 7,0 · 3 min a 5,5 · inclinação 1%',
+      },
+      DESC('2026-11-11', 'Descanso — sem intervalos esta semana'),
+      PT('2026-11-12'),
+      DESC('2026-11-13'),
+      DESC('2026-11-14'),
+      {
+        data: '2026-11-15', tipo: 'longa', titulo: 'Corrida longa — 6 km, muito fácil',
+        distanciaKm: 6,
+        detalhe: 'Fácil a sério, 8:30/km ou mais lento. Não é para testar nada.',
+        passadeira: 'Na rua: 8:30-9:00/km · ~53 min',
+      },
+    ],
+  },
+  {
+    semana: 9,
+    inicio: '2026-11-16',
+    titulo: 'Volta o ritmo de prova',
+    nota: 'Os intervalos mudam de objectivo: já não são para aguentar, são para aprender a viver ao ritmo a que queres correr em Dezembro. Blocos mais longos, e todos iguais.',
+    sessoes: [
+      PT('2026-11-16'),
+      {
+        data: '2026-11-17', tipo: 'facil', titulo: 'Corrida fácil — 30 min',
+        duracaoMin: 30,
+        passadeira: '5 min a 6,0 · 30 min a 7,0 · 3 min a 5,5 · inclinação 1%',
+      },
+      {
+        data: '2026-11-18', tipo: 'intervalos', titulo: 'Intervalos — 4 × 5 min a ritmo de prova',
+        detalhe: '10 min a trote · 4 × (5 min a ritmo de prova / 2 min a andar) · 5 min a trote. O ritmo de prova é o que fizeste a 8 de Novembro, não o que gostavas de ter feito.',
+        passadeira: '10 min a 6,7 · 4 × (5 min ao teu ritmo de prova / 2 min a 5,5) · 5 min a 6,5',
+      },
+      PT('2026-11-19'),
+      DESC('2026-11-20'),
+      DESC('2026-11-21'),
+      {
+        data: '2026-11-22', tipo: 'longa', titulo: 'Corrida longa — 10 km',
+        distanciaKm: 10,
+        detalhe: 'Fácil do princípio ao fim. A distância já a fizeste em prova — hoje é só rodagem.',
+        passadeira: 'Na rua: 8:15-8:45/km · ~86 min',
+      },
+    ],
+  },
+  {
+    semana: 10,
+    inicio: '2026-11-23',
+    titulo: 'Blocos mais longos',
+    nota: 'Os intervalos sobem para 6 minutos. Se o quarto bloco for mais lento do que o primeiro, saíste rápido de mais — o mesmo erro de sempre, em ponto pequeno.',
+    sessoes: [
+      PT('2026-11-23'),
+      {
+        data: '2026-11-24', tipo: 'facil', titulo: 'Corrida fácil — 35 min',
+        duracaoMin: 35,
+        passadeira: '5 min a 6,0 · 35 min a 7,0 · 3 min a 5,5 · inclinação 1%',
+      },
+      {
+        data: '2026-11-25', tipo: 'intervalos', titulo: 'Intervalos — 4 × 6 min a ritmo de prova',
+        detalhe: '10 min a trote · 4 × (6 min a ritmo de prova / 2 min a andar) · 5 min a trote.',
+        passadeira: '10 min a 6,7 · 4 × (6 min ao ritmo de prova / 2 min a 5,5) · 5 min a 6,5',
+      },
+      PT('2026-11-26'),
+      DESC('2026-11-27'),
+      DESC('2026-11-28'),
+      {
+        data: '2026-11-29', tipo: 'longa', titulo: 'Corrida longa — 11 km',
+        distanciaKm: 11,
+        detalhe: 'A mais longa de todo o bloco, e a ritmo fácil. Leva água.',
+        passadeira: 'Na rua: 8:15-8:45/km · ~95 min',
+      },
+    ],
+  },
+  {
+    semana: 11,
+    inicio: '2026-11-30',
+    titulo: 'A semana que decide Dezembro',
+    nota: 'Último trabalho a sério. O domingo tem os últimos 3 km a ritmo de prova com as pernas já cansadas — é o ensaio mais parecido com o que vais sentir no km 8.',
+    sessoes: [
+      PT('2026-11-30'),
+      {
+        data: '2026-12-01', tipo: 'facil', titulo: 'Corrida fácil — 35 min',
+        duracaoMin: 35,
+        passadeira: '5 min a 6,0 · 35 min a 7,0 · 3 min a 5,5 · inclinação 1%',
+      },
+      {
+        data: '2026-12-02', tipo: 'intervalos', titulo: 'Intervalos — 3 × 8 min a ritmo de prova',
+        detalhe: '10 min a trote · 3 × (8 min a ritmo de prova / 3 min a andar) · 5 min a trote. Blocos longos, para a cabeça se habituar a estar lá muito tempo.',
+        passadeira: '10 min a 6,7 · 3 × (8 min ao ritmo de prova / 3 min a 5,5) · 5 min a 6,5',
+      },
+      PT('2026-12-03'),
+      DESC('2026-12-04'),
+      DESC('2026-12-05'),
+      {
+        data: '2026-12-06', tipo: 'longa', titulo: 'Corrida longa — 11 km, os últimos 3 a ritmo',
+        distanciaKm: 11,
+        detalhe: '8 km fáceis e os últimos 3 km a ritmo de prova. Vai custar, e é suposto — é o ensaio do final da prova.',
+        passadeira: 'Na rua: 8 km a 8:30/km, depois 3 km ao ritmo de prova.',
+      },
+    ],
+  },
+  {
+    semana: 12,
+    inicio: '2026-12-07',
+    titulo: 'Descarga e segunda prova',
+    nota: 'Outra vez: vais sentir-te com energia a mais. Outra vez: não treines mais por isso. O trabalho está feito desde domingo passado.',
+    sessoes: [
+      PT('2026-12-07', 'PT leve — pede para aliviar as pernas'),
+      {
+        data: '2026-12-08', tipo: 'facil', titulo: 'Corrida fácil — 25 min',
+        duracaoMin: 25,
+        passadeira: '5 min a 6,0 · 25 min a 7,0 · 3 min a 5,5',
+      },
+      {
+        data: '2026-12-09', tipo: 'intervalos', titulo: 'Activação — 4 × 2 min a ritmo de prova',
+        detalhe: '10 min a trote · 4 × (2 min a ritmo de prova / 2 min a andar) · 5 min a trote. Curto de propósito: é para lembrar as pernas do ritmo, não para as cansar.',
+        passadeira: '10 min a 6,7 · 4 × (2 min ao ritmo de prova / 2 min a 5,5) · 5 min a 6,5',
+      },
+      PT('2026-12-10', 'PT leve — sem pernas'),
+      DESC('2026-12-11'),
+      DESC('2026-12-12', 'Descanso ou 15 min de caminhada'),
+      {
+        data: '2026-12-13', tipo: 'prova', titulo: 'PROVA 2 — 10 km',
+        distanciaKm: 10,
+        detalhe: 'O objectivo é bater o tempo de 8 de Novembro. E bate-se da mesma maneira de sempre: os primeiros 2 km mais lentos do que te apetece. Quem ganha tempo no fim é quem o não perdeu no princípio.',
+        passadeira: 'Vê o objectivo no topo do separador — sai do tempo que registaste na primeira prova.',
+      },
+    ],
+  },
+
+  // ---- Depois da segunda prova: só os dias de PT até ao fim do ano ----
+  {
+    semana: 13,
+    inicio: '2026-12-14',
+    titulo: 'Depois da prova — só PT',
+    nota: 'Provas feitas. A corrida fica ao teu critério; o que está marcado é só o PT. É a partir daqui que o défice calórico pode voltar a ser a prioridade número um.',
+    sessoes: [PT('2026-12-14'), PT('2026-12-17')],
+  },
+  {
+    semana: 14,
+    inicio: '2026-12-21',
+    titulo: 'Semana de Natal',
+    sessoes: [PT('2026-12-21'), PT('2026-12-24')],
+  },
+  {
+    semana: 15,
+    inicio: '2026-12-28',
+    fim: '2026-12-31',
+    titulo: 'Fim do ano',
+    sessoes: [PT('2026-12-28'), PT('2026-12-31')],
+  },
 ];
 
 export const TODAS_SESSOES = PLANO.flatMap((s) => s.sessoes.map((x) => ({ ...x, semana: s.semana })));

@@ -21,10 +21,15 @@ const somaDias = (iso, n) => {
   return isoData(d);
 };
 
-const fimDaSemana = (s) => somaDias(s.inicio, 6);
+/** Quase sempre o domingo seguinte, mas a última semana acaba a 31 de Dezembro. */
+const fimDaSemana = (s) => s.fim || somaDias(s.inicio, 6);
 
-/** Os sete dias de uma semana do plano. */
-const diasDaSemana = (s) => Array.from({ length: 7 }, (_, i) => somaDias(s.inicio, i));
+/** Os dias que uma semana do plano cobre. */
+function diasDaSemana(s) {
+  const dias = [];
+  for (let d = s.inicio; d <= fimDaSemana(s); d = somaDias(d, 1)) dias.push(d);
+  return dias;
+}
 
 /** Todas as sessões que existem hoje: as do plano que sobraram, já com as edições
  *  por cima, mais as que ela criou. `id` é a identidade da sessão, `data` o dia em
