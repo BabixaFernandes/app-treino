@@ -15,7 +15,6 @@ function estadoInicial() {
     treinos: {},    // "2026-09-23": { feito, distanciaKm, tempoMin, esforco, dorCanela, notas }
     ajustes: {},    // "2026-09-21": "2026-09-23" — sessão do plano movida para outro dia
     edicoes: {},    // "2026-09-23": { tipo, titulo, detalhe, passadeira, distanciaKm } — campos por cima do plano
-    removidas: {},  // "2026-09-23": true — sessão do plano apagada
     extras: {},     // "x-1758...": { data, tipo, titulo, detalhe, passadeira, distanciaKm } — sessão criada por ela
     pesos: {},      // "2026-09-21": 95.2
     alimentos: [],  // { id, nome, kcal, p, h, g, cat }
@@ -147,26 +146,28 @@ export function editarExtra(id, campos) {
   actualizar((e) => { e.extras[id] = { ...(e.extras[id] || {}), ...campos }; });
 }
 
-/** Apaga uma sessão. As do plano ficam só marcadas, para poderem voltar. */
+/** Apaga uma sessão. As que ela criou desaparecem; as do plano passam a dia de
+ *  descanso, para o dia não ficar vazio e para poderem voltar com o repor. */
 export function apagarSessao(id) {
   actualizar((e) => {
     if (e.extras[id]) {
       delete e.extras[id];
       delete e.treinos[id];
+      delete e.ajustes[id];
     } else {
-      e.removidas[id] = true;
+      e.edicoes[id] = {
+        tipo: 'descanso', titulo: 'Descanso', detalhe: '', passadeira: '', distanciaKm: null,
+      };
     }
-    delete e.ajustes[id];
   });
 }
 
-/** Devolve uma semana ao plano original: dias, conteúdos, apagadas e sessões criadas. */
+/** Devolve uma semana ao plano original: dias, conteúdos e sessões criadas. */
 export function reporSemana(idsPlano, idsExtra) {
   actualizar((e) => {
     idsPlano.forEach((id) => {
       delete e.ajustes[id];
       delete e.edicoes[id];
-      delete e.removidas[id];
     });
     idsExtra.forEach((id) => {
       delete e.extras[id];

@@ -6,6 +6,10 @@ import {
 } from '../store.js';
 
 const PROVA = '2026-11-08';
+const PROVA_2 = '2026-12-13';
+// Feita a primeira, a segunda deixa de ser sobre a distância e passa a ser sobre
+// o tempo: bater o da primeira, nem que seja por pouco.
+const MELHORIA = { min: 2, max: 3 };
 const DUROS = ['ergo', 'intervalos', 'longa', 'prova'];
 
 /** Os tipos que ela pode escolher ao editar. A prova não está aqui de propósito. */
@@ -29,7 +33,6 @@ function todasAsSessoes() {
   const e = obter();
 
   const doPlano = PLANO.flatMap((s) => s.sessoes)
-    .filter((x) => !e.removidas[x.data])
     .map((x) => ({
       ...x,
       ...(e.edicoes[x.data] || {}),
@@ -177,9 +180,15 @@ export function renderTreinos(raiz) {
   });
 
   raiz.querySelectorAll('[data-repor]').forEach((el) => {
-    el.addEventListener('click', () => {
+    el.addEventListener('click', async () => {
       const semana = PLANO.find((s) => s.semana === Number(el.dataset.repor));
-      if (!confirm('Repor esta semana como está no plano?\n\nOs dias, as alterações que fizeste e as sessões que acrescentaste voltam atrás. Os registos das sessões do plano mantêm-se.')) return;
+      const ok = await confirmar({
+        titulo: `Repor a semana ${semana.semana}?`,
+        texto: 'Os dias, as alterações que fizeste e as sessões que acrescentaste voltam ao plano. '
+          + 'Os registos das sessões do plano mantêm-se.',
+        rotulo: 'Repor',
+      });
+      if (!ok) return;
       const ids = idsDaSemana(semana);
       reporSemana(ids.plano, ids.extra);
       renderTreinos(raiz);
@@ -197,11 +206,17 @@ export function renderTreinos(raiz) {
 }
 
 function cabecalho(hoje) {
-  const dias = Math.round((new Date(PROVA) - new Date(hoje)) / 86400000);
+  const treinos = obter().treinos;
+  const prova1 = treinos[PROVA] || {};
+  const feita1 = !!prova1.feito;
+
+  // Feita a primeira prova, a contagem vira-se para a segunda.
+  const alvo = feita1 ? PROVA_2 : PROVA;
+  const dias = Math.round((new Date(alvo) - new Date(hoje)) / 86400000);
+
   // Conta as sessões que existem agora, e não as do plano: ela pode ter apagado
   // umas e acrescentado outras.
   const sessoes = todasAsSessoes().filter((s) => s.tipo !== 'descanso');
-  const treinos = obter().treinos;
   const feitos = sessoes.filter((s) => treinos[s.id]?.feito).length;
   const total = sessoes.length;
   const pct = total ? Math.round((feitos / total) * 100) : 0;
@@ -210,19 +225,51 @@ function cabecalho(hoje) {
     <div class="destaque">
       <div class="contagem">
         <strong>${dias > 0 ? dias : 0}</strong>
-        <span>${dias === 1 ? 'dia' : 'dias'} até aos 10 km</span>
+        <span>${dias === 1 ? 'dia' : 'dias'} até ${feita1 ? 'à segunda prova' : 'aos 10 km'}</span>
       </div>
       <div class="barra-progresso"><div style="width:${pct}%"></div></div>
       <p class="legenda">${feitos} de ${total} sessões feitas · ${pct}%</p>
+      ${feita1 ? objectivoProva2(prova1) : ''}
     </div>
   `;
+}
+
+/** O alvo de 13 de Dezembro sai do tempo que ela fez a 8 de Novembro, não de um
+ *  número decidido de antemão. */
+function objectivoProva2(prova1) {
+  if (!prova1.tempoMin) {
+    return `
+      <div class="objectivo-2 falta">
+        <strong>13 de Dezembro</strong>
+        <p>Regista o tempo de 8 de Novembro para o objectivo desta prova ficar definido.</p>
+      </div>`;
+  }
+
+  const t = prova1.tempoMin;
+  const rapido = t - MELHORIA.max;
+  const lento = t - MELHORIA.min;
+  const km = prova1.distanciaKm || 10;
+
+  return `
+    <div class="objectivo-2">
+      <strong>Objectivo a 13 de Dezembro</strong>
+      <p class="alvo">${rapido} a ${lento} min</p>
+      <p>
+        Menos ${MELHORIA.min} a ${MELHORIA.max} min do que os ${t} de 8 de Novembro.
+        Dá ${ritmoPorKm(lento, km)} a ${ritmoPorKm(rapido, km)}, contra os ${ritmoPorKm(t, km)} que fizeste.
+      </p>
+    </div>`;
+}
+
+function ritmoPorKm(minutos, km) {
+  const seg = (minutos * 60) / km;
+  return `${Math.floor(seg / 60)}:${String(Math.round(seg % 60)).padStart(2, '0')}/km`;
 }
 
 function semanaHTML(s, estado, hoje, pt) {
   const lista = sessoesDaSemana(s);
   const activa = hoje >= s.inicio && hoje <= fimDaSemana(s);
-  const ajustada = lista.some((x) => x.extra || x.editada || x.data !== x.id)
-    || s.sessoes.some((x) => estado.removidas[x.data]);
+  const ajustada = lista.some((x) => x.extra || x.editada || x.data !== x.id);
   const aviso = avisoDaSemana(lista);
 
   return `
@@ -344,6 +391,31 @@ function tabelaRitmos() {
   `;
 }
 
+/** Confirmação feita com o diálogo da app. O `confirm()` do browser não é de
+ *  confiança dentro de uma PWA instalada — há contextos em que nunca aparece. */
+function confirmar({ titulo, texto, rotulo = 'Confirmar' }) {
+  return new Promise((resolve) => {
+    const d = document.createElement('dialog');
+    d.className = 'modal';
+    d.innerHTML = `
+      <form method="dialog">
+        <h3>${titulo}</h3>
+        <p class="sub">${texto}</p>
+        <div class="botoes">
+          <button value="nao" class="secundario">Cancelar</button>
+          <button value="sim" class="primario">${rotulo}</button>
+        </div>
+      </form>`;
+    document.body.appendChild(d);
+    d.showModal();
+    d.addEventListener('close', () => {
+      const sim = d.returnValue === 'sim';
+      d.remove();
+      resolve(sim);
+    });
+  });
+}
+
 // ---- Trocar uma sessão de dia ----
 
 /** As sessões do plano mudam de dia por ajuste; as acrescentadas guardam o dia nelas. */
@@ -458,7 +530,7 @@ function abrirEdicao(id, numSemana, raiz) {
 
       ${!nova ? `
         <button type="button" class="secundario largo apagar-sessao" id="e-apagar">
-          Apagar esta sessão
+          ${sessao.extra ? 'Apagar esta sessão' : 'Apagar — passa a dia de descanso'}
         </button>` : ''}
       ${original && sessao.editada ? `
         <button type="button" class="secundario largo" id="e-repor">
@@ -476,10 +548,6 @@ function abrirEdicao(id, numSemana, raiz) {
   dialogo.showModal();
 
   dialogo.querySelector('#e-apagar')?.addEventListener('click', () => {
-    const aviso = sessao.extra
-      ? 'Apagar esta sessão? O que estiver registado nela perde-se.'
-      : 'Apagar esta sessão do plano?\n\nPodes trazê-la de volta com "repor o plano original" no topo da semana.';
-    if (!confirm(aviso)) return;
     apagarSessao(sessao.id);
     dialogo.close();
     renderTreinos(raiz);

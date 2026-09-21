@@ -1,6 +1,12 @@
 # 10K — app de treino
 
-Plano de treino, registo de peso e contagem de calorias para os 10 km de **8 de Novembro de 2026**.
+Plano de treino, registo de peso e contagem de calorias para os 10 km de **8 de Novembro de 2026**,
+e para a segunda prova a **13 de Dezembro**.
+
+Feita a primeira prova, a contagem decrescente vira-se para a segunda e o objectivo deixa de
+ser a distância: passa a ser **bater o tempo da primeira por 2 a 3 minutos**. O alvo é calculado
+a partir do tempo que ficou registado a 8 de Novembro, e não de um número decidido de antemão —
+por isso só aparece depois de esse tempo estar lá.
 
 É uma PWA: um site que o Android guarda no ecrã inicial com ícone próprio, abre em ecrã
 inteiro sem barra do browser e funciona sem internet.
@@ -65,7 +71,14 @@ O plano é um ponto de partida, não uma jaula. Cada sessão tem dois botões:
 | ⇄ | Trocar de dia com outra sessão da mesma semana |
 
 No fim de cada semana há ainda **+ Acrescentar sessão**, para os treinos que o plano não
-previu. Um dia pode ficar com duas sessões ou com nenhuma.
+previu. Um dia pode ficar com duas sessões.
+
+Apagar uma sessão do plano transforma-a em **dia de descanso** — o dia não fica vazio, e a
+sessão volta com o repor. Uma sessão acrescentada por ti desaparece mesmo.
+
+As confirmações usam o diálogo da própria app e não o `confirm()` do browser, que em PWA
+instalada há contextos em que simplesmente não aparece — e um botão que não faz nada é pior
+do que não ter botão.
 
 O que fica registado (distância, tempo, esforço, dor na canela) **acompanha a sessão**, não
 o dia: o registo é guardado com a data original do plano, e as alterações ficam à parte, em
