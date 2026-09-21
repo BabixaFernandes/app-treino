@@ -1,4 +1,8 @@
 import { obter, guardarAlvos, calcularAlvos } from '../store.js';
+import { PLANO } from '../data/plano.js';
+
+const MESES_LONGOS = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+  'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
 
 const ACTIVIDADES = [
   { v: 1.35, label: 'Sedentário, 2 a 3 treinos por semana' },
@@ -15,6 +19,9 @@ const DEFICES = [
 export function abrirDefinicoes(aoFechar) {
   const alvos = obter().alvos;
   const primeira = !alvos.configurado;
+  const inicio = PLANO[0].inicio;
+  const mesInicio = MESES_LONGOS[Number(inicio.slice(5, 7)) - 1];
+  const diaInicio = Number(inicio.slice(8));
 
   const dialogo = document.createElement('dialog');
   dialogo.className = 'modal';
@@ -82,6 +89,18 @@ export function abrirDefinicoes(aoFechar) {
       </div>
       <p class="legenda">O peso de partida serve só de referência para veres quanto já andaste.</p>
 
+      <h4 class="sec">Treinos de PT</h4>
+      <div class="par">
+        <label>Quantos por mês<input type="number" name="ptPorMes" step="1" min="0" inputmode="numeric"
+          value="${alvos.ptPorMes ?? 8}"></label>
+        <label>Já feitos em ${mesInicio} antes de ${diaInicio}<input type="number" name="ptAntes" step="1" min="0"
+          inputmode="numeric" value="${alvos.ptAntes ?? 0}"></label>
+      </div>
+      <p class="legenda">
+        O plano arranca a ${diaInicio} de ${mesInicio}, a meio do mês. O segundo número diz à app
+        quantos PT já lá tinhas antes disso, para a contagem do mês bater certo.
+      </p>
+
       <div class="botoes">
         ${primeira ? '' : '<button value="cancelar" class="secundario">Cancelar</button>'}
         <button value="guardar" class="primario" ${primeira ? 'style="grid-column:1/-1"' : ''}>Guardar</button>
@@ -125,6 +144,8 @@ export function abrirDefinicoes(aoFechar) {
         gordura: Number(f.get('gordura')) || 60,
         pesoInicial: f.get('pesoInicial') ? Number(f.get('pesoInicial')) : null,
         pesoAlvo: f.get('pesoAlvo') ? Number(f.get('pesoAlvo')) : null,
+        ptPorMes: Number(f.get('ptPorMes')) || 0,
+        ptAntes: Number(f.get('ptAntes')) || 0,
         altura: num('#c-altura') || null,
         idade: num('#c-idade') || null,
         sexo: dialogo.querySelector('#c-sexo').value,

@@ -19,13 +19,81 @@ function eDomingo(iso) {
   return new Date(iso + 'T12:00:00').getDay() === 0;
 }
 
+const MESES_LONGOS = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+  'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+
+const nomeMes = (mes) => MESES_LONGOS[Number(mes.slice(5, 7)) - 1];
+
+/** O último dia que o plano cobre. Depois disto não há informação nenhuma. */
+function fimDoPlano() {
+  return PLANO.flatMap((s) => s.sessoes.map((x) => dataEfectiva(x.data))).sort().pop();
+}
+
+/** Numera as sessões de PT dentro de cada mês e resume cada mês face ao pacote.
+ *
+ *  Conta pelo dia que a sessão tem no plano, e não pelo dia em que foi feita: um PT
+ *  marcado para 1 de Outubro que se antecipa para 30 de Setembro continua a descontar
+ *  do pacote de Outubro. O mês em que o plano arranca leva ainda os treinos já feitos
+ *  antes do primeiro dia do bloco, que só ela sabe quantos foram. */
+function contagemPT() {
+  const { ptAntes = 0, ptPorMes = 8 } = obter().alvos;
+  const mesInicial = PLANO[0].inicio.slice(0, 7);
+  const fim = fimDoPlano();
+
+  const porMes = {};
+  PLANO.flatMap((s) => s.sessoes)
+    .filter((x) => x.tipo === 'pt')
+    .sort((a, b) => a.data.localeCompare(b.data))
+    .forEach((p) => { (porMes[p.data.slice(0, 7)] ||= []).push(p.data); });
+
+  const mapa = {};
+  const meses = Object.entries(porMes).map(([mes, ids]) => {
+    const base = mes === mesInicial ? ptAntes : 0;
+    const total = base + ids.length;
+    ids.forEach((id, i) => { mapa[id] = { n: base + i + 1, total }; });
+
+    // Um mês só se pode comparar com o pacote se o plano o cobrir até ao fim.
+    const ultimoDia = new Date(Number(mes.slice(0, 4)), Number(mes.slice(5, 7)), 0);
+    const completo = fim >= isoData(ultimoDia);
+    return { mes, total, completo, desvio: total - ptPorMes };
+  });
+
+  return { mapa, meses, pacote: ptPorMes };
+}
+
+function resumoPT({ meses, pacote }) {
+  return `
+    <div class="cartao resumo-pt">
+      <h4>Treinos de PT</h4>
+      <div class="linhas-pt">
+        ${meses.map((m) => {
+          const estado = !m.completo
+            ? '<span class="parcial">o plano só cobre parte do mês</span>'
+            : m.desvio === 0
+              ? '<span class="certo">certo</span>'
+              : `<span class="fora">${m.desvio > 0 ? '+' : ''}${m.desvio}</span>`;
+          return `
+            <div class="linha-pt">
+              <span class="mes">${nomeMes(m.mes)}</span>
+              <span class="n">${m.total} ${m.total === 1 ? 'treino' : 'treinos'}</span>
+              ${estado}
+            </div>`;
+        }).join('')}
+      </div>
+      <p class="legenda">Pacote de ${pacote} por mês. Muda-o nas definições, com os que já tinhas feito antes de o plano começar.</p>
+    </div>
+  `;
+}
+
 export function renderTreinos(raiz) {
   const estado = obter();
   const hoje = isoData();
+  const pt = contagemPT();
 
   raiz.innerHTML = `
     ${cabecalho(hoje)}
-    <div id="lista-semanas">${PLANO.map((s) => semanaHTML(s, estado, hoje)).join('')}</div>
+    <div id="lista-semanas">${PLANO.map((s) => semanaHTML(s, estado, hoje, pt.mapa)).join('')}</div>
+    ${resumoPT(pt)}
     ${tabelaRitmos()}
   `;
 
@@ -84,7 +152,7 @@ function cabecalho(hoje) {
   `;
 }
 
-function semanaHTML(s, estado, hoje) {
+function semanaHTML(s, estado, hoje, pt) {
   const lista = sessoesDaSemana(s);
   const fim = lista[lista.length - 1].data;
   const activa = hoje >= s.inicio && hoje <= fim;
@@ -107,7 +175,7 @@ function semanaHTML(s, estado, hoje) {
             <button type="button" data-repor="${s.semana}">repor o plano original</button>
           </p>` : ''}
         ${aviso ? `<p class="nota aviso-semana">⚠ ${aviso}</p>` : ''}
-        ${lista.map((x) => sessaoHTML(x, estado, hoje, s.semana)).join('')}
+        ${lista.map((x) => sessaoHTML(x, estado, hoje, s.semana, pt)).join('')}
       </div>
     </section>
   `;
@@ -129,7 +197,8 @@ function avisoDaSemana(lista) {
   return null;
 }
 
-function sessaoHTML(sessao, estado, hoje, semana) {
+function sessaoHTML(sessao, estado, hoje, semana, pt) {
+  const contagem = pt[sessao.id];
   const reg = estado.treinos[sessao.id] || {};
   const info = TIPO_INFO[sessao.tipo];
   const registavel = sessao.tipo !== 'descanso';
@@ -157,7 +226,7 @@ function sessaoHTML(sessao, estado, hoje, semana) {
           ${movivel ? `<button type="button" class="mover" data-mover="${sessao.id}" data-semana="${semana}"
              aria-label="Trocar de dia" title="Trocar de dia">⇄</button>` : ''}
         </div>
-        <h4>${sessao.titulo}</h4>
+        <h4>${sessao.titulo}${contagem ? ` <span class="contagem-pt">treino ${contagem.n} de ${contagem.total}</span>` : ''}</h4>
         ${sessao.detalhe ? `<p class="detalhe">${sessao.detalhe}</p>` : ''}
         ${sessao.passadeira ? `<p class="passadeira">🏃 ${sessao.passadeira}</p>` : ''}
         ${reg.feito ? resumoRegisto(reg) : ''}

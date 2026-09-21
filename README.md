@@ -73,6 +73,22 @@ Há dois avisos, que assinalam mas não impedem:
 
 A prova não se move.
 
+## Contagem dos treinos de PT
+
+Cada sessão de PT mostra em que número do mês vai — *treino 5 de 8* — e no fim do
+separador há um resumo por mês que assinala quando um mês foge ao pacote (*+1*, *-1*).
+
+Duas regras que não são óbvias:
+
+- **A contagem segue o dia que a sessão tem no plano, não o dia em que foi feita.**
+  Um PT marcado para 1 de Outubro que se antecipe para 30 de Setembro continua a
+  descontar do pacote de Outubro.
+- **Um mês que o plano não cubra até ao fim não é comparado com o pacote** — diz apenas
+  quantos tem. É o caso de Novembro, em que o plano acaba no dia da prova.
+
+O tamanho do pacote e quantos PT já tinhas feito antes de o plano começar definem-se
+nas definições. São dados teus, por isso ficam no dispositivo e não no código.
+
 ## Cópias de segurança
 
 Os dados ficam guardados no próprio dispositivo (`localStorage`), não numa nuvem. Isto quer dizer:

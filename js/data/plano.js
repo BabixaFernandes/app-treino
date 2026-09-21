@@ -10,6 +10,11 @@ export const ALVOS_PADRAO = {
   gordura: 60,
   pesoInicial: null,
   pesoAlvo: null,
+  // Quantos PT já tinham sido feitos no mês em que o plano arranca, antes do
+  // primeiro dia dele — o plano começa a meio de Setembro e não os conhece.
+  ptAntes: 0,
+  // Quantos PT tem um mês normal, para se ver quando um mês foge ao pacote.
+  ptPorMes: 8,
   configurado: false,
 };
 
