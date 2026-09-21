@@ -19,8 +19,9 @@ function estadoInicial() {
     pesos: {},      // "2026-09-21": 95.2
     ciclos: [],     // [{ inicio: "2026-09-18", fim: "2026-09-22" }] — fim null até ser marcado
     sintomas: {},   // "2026-09-19": { dores: 0-2, cansaco: 0-2, fluxo: 0-2 }
-    alimentos: [],  // { id, nome, kcal, p, h, g, cat }
+    alimentos: [],  // { id, nome, kcal, p, h, g, cat, porcao }
     diario: {},     // "2026-09-21": [ { id, alimentoId, gramas, refeicao } ]
+    refeicoes: [],  // { id, nome, itens: [ { alimentoId, gramas } ] } — refeições guardadas
   };
 }
 
@@ -297,6 +298,60 @@ export function removerDoDiario(data, id) {
   });
 }
 
+/** Corrigir uma entrada sem a apagar e voltar a fazer o caminho todo. */
+export function actualizarNoDiario(data, id, campos) {
+  actualizar((e) => {
+    const linha = (e.diario[data] || []).find((x) => x.id === id);
+    if (linha) Object.assign(linha, campos);
+  });
+}
+
+/** Traz o diário de outro dia para cá. Acrescenta, não substitui. */
+export function copiarDia(de, para) {
+  actualizar((e) => {
+    const origem = e.diario[de] || [];
+    if (!origem.length) return;
+    e.diario[para] = [...(e.diario[para] || []), ...origem.map((l, i) => ({
+      ...l, id: `d-${Date.now()}-${i}`,
+    }))];
+  });
+}
+
+/** Quantas vezes cada alimento foi usado, e quando foi a última — para o pôr à mão. */
+export function usoDosAlimentos() {
+  const uso = {};
+  Object.entries(estado.diario).forEach(([data, linhas]) => {
+    linhas.forEach((l) => {
+      const u = (uso[l.alimentoId] ||= { n: 0, ultima: '' });
+      u.n += 1;
+      if (data > u.ultima) u.ultima = data;
+    });
+  });
+  return uso;
+}
+
+// ---- Refeições guardadas ----
+
+export function guardarRefeicao(nome, itens) {
+  const id = `r-${Date.now()}`;
+  actualizar((e) => { e.refeicoes.push({ id, nome, itens }); });
+  return id;
+}
+
+export function apagarRefeicaoGuardada(id) {
+  actualizar((e) => { e.refeicoes = e.refeicoes.filter((r) => r.id !== id); });
+}
+
+export function aplicarRefeicao(data, refeicaoId, slot) {
+  actualizar((e) => {
+    const r = e.refeicoes.find((x) => x.id === refeicaoId);
+    if (!r) return;
+    e.diario[data] = [...(e.diario[data] || []), ...r.itens.map((it, i) => ({
+      id: `d-${Date.now()}-${i}`, alimentoId: it.alimentoId, gramas: it.gramas, refeicao: slot,
+    }))];
+  });
+}
+
 /** Soma dos macros de um dia. */
 export function totaisDoDia(data) {
   const linhas = estado.diario[data] || [];
@@ -313,6 +368,27 @@ export function totaisDoDia(data) {
     },
     { kcal: 0, p: 0, h: 0, g: 0 }
   );
+}
+
+/** Média de calorias e proteína na semana (segunda a domingo) que contém `data`.
+ *  Conta só os dias com algo registado — a média de sete dias com três em branco
+ *  não é uma média, é um erro. */
+export function mediaSemanalComida(data) {
+  const d = new Date(data + 'T12:00:00');
+  const segunda = somaDias(data, -((d.getDay() + 6) % 7));
+
+  const dias = Array.from({ length: 7 }, (_, i) => somaDias(segunda, i));
+  const comRegisto = dias.filter((x) => (estado.diario[x] || []).length);
+  if (!comRegisto.length) return { dias: 0, deDias: 7, segunda };
+
+  const totais = comRegisto.map((x) => totaisDoDia(x));
+  return {
+    dias: comRegisto.length,
+    deDias: 7,
+    segunda,
+    kcal: totais.reduce((a, t) => a + t.kcal, 0) / totais.length,
+    proteina: totais.reduce((a, t) => a + t.p, 0) / totais.length,
+  };
 }
 
 // ---- Cópia de segurança ----

@@ -444,6 +444,31 @@ button.apagar-sessao { color: var(--vermelho); border-color: rgba(255, 95, 86, .
 }
 .lista-alimentos { max-height: 340px; overflow-y: auto; margin-top: 10px; }
 
+.acoes-comida { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+.acoes-comida button { font-family: inherit; font-size: .84rem; font-weight: 600; border-radius: 11px; padding: 12px 8px; cursor: pointer; border: 1px solid transparent; }
+.acoes-comida #add-comida { grid-column: 1 / -1; background: var(--primaria); color: #06121f; }
+.acoes-comida .secundario { background: var(--superficie-2); color: var(--texto); border-color: var(--borda); }
+
+.refeicao-topo .guardar-refeicao {
+  background: none; border: none; color: var(--primaria); cursor: pointer;
+  font-family: inherit; font-size: .72rem; font-weight: 600; padding: 0 0 0 10px;
+  text-decoration: underline;
+}
+.linha-diario.editavel {
+  width: 100%; background: none; border: none; border-bottom: 1px solid var(--borda);
+  color: var(--texto); font-family: inherit; text-align: left; cursor: pointer; padding: 9px 0;
+}
+.linha-diario.editavel:last-child { border-bottom: none; }
+.linha-diario.editavel:active { background: var(--superficie-2); }
+.linha-diario .seta { color: var(--texto-fraco); flex: none; }
+
+.unidade { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; background: var(--superficie-2); border: 1px solid var(--borda); border-radius: 10px; padding: 3px; margin-bottom: 10px; }
+.unidade button {
+  background: none; border: none; color: var(--texto-fraco); cursor: pointer;
+  font-family: inherit; font-size: .78rem; font-weight: 600; padding: 8px 4px; border-radius: 8px;
+}
+.unidade button.activa { background: var(--superficie); color: var(--texto); }
+
 /* ---- Botões ---- */
 button.primario, button.secundario {
   font-family: inherit; font-size: .92rem; font-weight: 600;
@@ -495,6 +520,8 @@ dialog.modal input:focus, dialog.modal select:focus, dialog.modal textarea:focus
   font-family: inherit; font-size: .86rem; text-align: left;
 }
 .opcao.activa { border-color: var(--primaria); background: rgba(79, 157, 255, .12); }
+/* `display: flex` acima ganha ao [hidden] do browser, e a pesquisa não escondia nada. */
+.opcao[hidden], .grupo[hidden] { display: none; }
 .escolhido { border-top: 1px solid var(--borda); padding-top: 12px; }
 .escolhido h4 { margin: 0 0 10px; font-size: .95rem; }
 

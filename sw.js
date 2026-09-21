@@ -1,6 +1,6 @@
 // Service worker: guarda os ficheiros da app para funcionar sem internet.
 // Sobe a versão sempre que mudares ficheiros, para forçar actualização.
-const VERSAO = 'treino10k-v16';
+const VERSAO = 'treino10k-v17';
 
 const FICHEIROS = [
   './',

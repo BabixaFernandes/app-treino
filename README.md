@@ -271,6 +271,44 @@ A única coisa que o balanço semanal diz sobre o ciclo é contexto, e só quand
 dor na canela **e** dias marcados como fortes: serve para uma semana difícil não ser lida como
 perda de forma.
 
+## O separador Comida
+
+O registo alimentar não se abandona por falta de funcionalidades — abandona-se por cansaço. Cada
+entrada eram seis passos, e num dia de dez itens isso são setenta interacções. Tudo aqui vai no
+sentido de **menos toques por dia**:
+
+**Porções.** Cada alimento sabe o que é na vida real — um ovo são 55 g, uma fatia de pão 35 g, uma
+lata de atum 80 g. Escreves `2 ovos` em vez de 110 g, e a app guarda gramas por baixo. O diário
+mostra as duas coisas: *2 ovos · 110 g*. Alimentos criados por ti podem ter porção também.
+
+Os plurais irregulares estão escritos nos dados (`colheres de sopa`, `requeijões`,
+`batatas médias`), porque o `+s` ingénuo dava *colher de sopas*. E o campo diz
+*Quantidade (fatias)* em vez de *quantas/quantos* — o género de cada porção não é adivinhável.
+
+**Mais usados primeiro.** O diálogo de adicionar abre com os alimentos que mais usaste, ordenados
+por frequência. Sem isso, o iogurte de todas as manhãs ficava ao mesmo nível do bacalhau que
+comeste uma vez.
+
+**Copiar um dia.** Um toque traz as entradas de outro dia, com os totais à vista para escolheres
+qual. Come-se parecido de um dia para o outro, e isto elimina o trabalho de dias inteiros.
+
+**Refeição adivinhada pela hora.** Às 13h o campo vem em *Almoço*.
+
+**Editar uma entrada.** Tocar numa linha do diário abre-a — e abre **na unidade em que foi
+registada**. Abrir sempre em gramas era a maneira mais fácil de trocar «3 fatias» por «3 gramas»
+sem se dar por isso.
+
+**Refeições guardadas.** O botão *guardar* no canto de cada refeição guarda-a inteira; depois
+aplica-se a qualquer refeição do dia com um toque. É também o alicerce da fase 2, porque uma
+ementa é uma sequência de refeições guardadas.
+
+**Média da semana.** Calorias e proteína médias dos dias registados, que é o número que decide se
+ajustas as calorias — não o total de um dia. Conta só os dias com registo, e com menos de quatro
+di-lo em vez de apresentar uma média de três dias como se fosse de sete.
+
+O alvo de calorias **não muda nos dias de treino**, de propósito: o plano fixa 2100 kcal todos os
+dias, e um alvo que se move sozinho tira a única referência estável que há.
+
 ## Cópias de segurança
 
 Os dados ficam guardados no próprio dispositivo (`localStorage`), não numa nuvem. Isto quer dizer:
