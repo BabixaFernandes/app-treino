@@ -96,17 +96,25 @@ Há dois avisos, que assinalam mas não impedem:
 
 A prova não se edita nem se move.
 
-## Ritmos no cartão
+## Passadeira ou rua
 
-Cada sessão de corrida mostra, logo por baixo do título, o ritmo **na passadeira** e
-**na rua** — para não ser preciso abrir a tabela do fim a meio de um treino.
+No topo do separador há um interruptor **Passadeira / Rua**. A prescrição de cada sessão é
+escrita uma só vez, em velocidades de passadeira, e converte-se para pace quando se escolhe
+a rua:
 
-Nas semanas 9 a 12 o ritmo de referência é *ritmo de prova*, que não é um número decidido
-de antemão: é o que ela fizer a 8 de Novembro. Essas sessões calculam-no a partir do tempo
-registado na primeira prova, e enquanto ele não existir dizem-no em vez de inventar. O cartão
-da segunda prova mostra o ritmo **alvo** — o da primeira menos os 2 a 3 minutos a ganhar.
+```
+🏃  5 min a 6,0 · 33 min a 7,0 · 3 min a 5,5 · inclinação 1%
+🛣️  5 min a 10:00/km · 33 min a 8:34/km · 3 min a 10:55/km
+```
 
-Escrever os ritmos à mão no editor desliga esse cálculo para essa sessão.
+A inclinação desaparece no modo rua, onde não quer dizer nada. A escolha fica guardada.
+
+Nas semanas 9 a 12 o plano diz *ritmo de prova*, que não é um número decidido de antemão:
+é o que ela fizer a 8 de Novembro. Essas sessões escrevem-se com o marcador `{prova}`, e a
+app substitui-o pelo ritmo que sai do tempo registado na primeira prova — em km/h ou em
+min/km, conforme o modo. O `{alvo}` faz o mesmo para a segunda prova, mas com os 2 a 3
+minutos a ganhar já descontados. Enquanto não houver tempo registado, dizem-no em vez de
+inventar um número.
 
 ## Contagem dos treinos de PT
 

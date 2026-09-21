@@ -187,18 +187,18 @@ button.apagar-sessao { color: var(--vermelho); border-color: rgba(255, 95, 86, .
 .etiqueta { font-size: .62rem; text-transform: uppercase; letter-spacing: .07em; color: var(--texto-fraco); font-weight: 600; }
 .visto { color: var(--verde); font-weight: 700; }
 .aviso { font-size: .68rem; color: var(--vermelho); font-weight: 600; }
-.ritmos-sessao {
-  display: flex; flex-wrap: wrap; gap: 5px; margin: 7px 0 0;
+.modo-ritmo {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-bottom: 12px;
+  background: var(--superficie); border: 1px solid var(--borda);
+  border-radius: var(--raio); padding: 4px;
 }
-.ritmos-sessao span {
-  font-size: .76rem; font-weight: 600; color: var(--texto);
-  background: var(--superficie-2); border: 1px solid var(--borda);
-  border-radius: 7px; padding: 2px 8px;
+.modo-ritmo button {
+  background: none; border: none; color: var(--texto-fraco);
+  font-family: inherit; font-size: .82rem; font-weight: 600;
+  padding: 9px 4px; border-radius: 10px; cursor: pointer;
 }
-.ritmos-sessao em {
-  font-style: normal; font-weight: 500; color: var(--texto-fraco);
-  text-transform: uppercase; font-size: .62rem; letter-spacing: .05em; margin-right: 4px;
-}
+.modo-ritmo button.activo { background: var(--superficie-2); color: var(--texto); }
+
 .detalhe { font-size: .82rem; color: var(--texto-fraco); margin: 5px 0 0; }
 .passadeira { font-size: .78rem; color: var(--primaria); margin: 6px 0 0; }
 .registo {

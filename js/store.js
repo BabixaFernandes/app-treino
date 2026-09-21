@@ -72,6 +72,11 @@ export function guardarAlvos(novos) {
   });
 }
 
+/** Mostrar os ritmos em velocidade de passadeira ou em pace de rua. */
+export function definirModoRitmo(modo) {
+  actualizar((e) => { e.alvos.modoRitmo = modo; });
+}
+
 /** Alvos estimados a partir das medidas. Mifflin-St Jeor + factor de actividade. */
 export function calcularAlvos({ peso, altura, idade, sexo, actividade, defice }) {
   const tmb = 10 * peso + 6.25 * altura - 5 * idade + (sexo === 'm' ? 5 : -161);

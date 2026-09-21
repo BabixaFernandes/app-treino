@@ -1,7 +1,7 @@
 import { PLANO, TIPO_INFO, RITMOS } from '../data/plano.js';
 import {
   obter, registarTreino, isoData, diaCurto, dataLegivel,
-  dataEfectiva, moverSessao, reporSemana,
+  dataEfectiva, moverSessao, reporSemana, definirModoRitmo,
   editarSessao, reporConteudo, editarExtra, criarSessao, apagarSessao,
 } from '../store.js';
 
@@ -149,6 +149,7 @@ export function renderTreinos(raiz) {
 
   raiz.innerHTML = `
     ${cabecalho(hoje)}
+    ${selectorModo()}
     <div id="lista-semanas">${PLANO.map((s) => semanaHTML(s, estado, hoje, pt.mapa)).join('')}</div>
     ${resumoPT(pt)}
     ${tabelaRitmos()}
@@ -159,6 +160,13 @@ export function renderTreinos(raiz) {
       const alvo = raiz.querySelector(`#semana-${el.dataset.abrir}`);
       alvo.classList.toggle('fechada');
       el.classList.toggle('fechada');
+    });
+  });
+
+  raiz.querySelectorAll('[data-modo]').forEach((el) => {
+    el.addEventListener('click', () => {
+      definirModoRitmo(el.dataset.modo);
+      renderTreinos(raiz);
     });
   });
 
@@ -266,42 +274,70 @@ function objectivoProva2(prova1) {
     </div>`;
 }
 
-/** Os ritmos a mostrar no cartão. Há dois que não têm número fixo: o «ritmo de
- *  prova» das sessões de Novembro e Dezembro, que é o que ela fizer a 8 de
- *  Novembro, e o da segunda prova, que é esse menos os 2 a 3 minutos a ganhar. */
-function ritmosDe(sessao) {
-  const prova = obter().treinos[PROVA] || {};
-  const km = prova.distanciaKm || 10;
+// ---- Passadeira ou rua ----
+//
+// A prescrição de cada sessão é escrita em velocidades de passadeira. Na rua não
+// se corre a 7,0 km/h, corre-se a 8:34/km — por isso o mesmo texto converte-se,
+// em vez de haver duas versões para manter.
 
-  if (sessao.ritmoAlvo) {
-    if (!prova.tempoMin) return { rua: 'sai do teu tempo de 8 de Novembro' };
-    return {
-      passadeira: `${kmhDe(prova.tempoMin - MELHORIA.min, km)}-${kmhDe(prova.tempoMin - MELHORIA.max, km)} km/h`,
-      rua: `${ritmoPorKm(prova.tempoMin - MELHORIA.min, km)} a ${ritmoPorKm(prova.tempoMin - MELHORIA.max, km)}`,
-    };
-  }
+const modoRitmo = () => obter().alvos.modoRitmo || 'passadeira';
 
-  if (!sessao.ritmoDeProva) return sessao.ritmos || null;
-
-  if (!prova.tempoMin) {
-    return { rua: 'o teu ritmo de 8 de Novembro — ainda por registar' };
-  }
-  const onde = sessao.sufixoRitmo ? ` ${sessao.sufixoRitmo}` : '';
-  return {
-    passadeira: `${kmhDe(prova.tempoMin, km)} km/h${onde}`,
-    rua: `${ritmoPorKm(prova.tempoMin, km)}${onde}`,
-  };
+/** 7,0 (km/h) → "8:34/km" */
+function paceDe(velocidade) {
+  const kmh = Number(String(velocidade).replace(',', '.'));
+  if (!kmh) return velocidade;
+  const seg = 3600 / kmh;
+  return `${Math.floor(seg / 60)}:${String(Math.round(seg % 60)).padStart(2, '0')}/km`;
 }
 
 const kmhDe = (minutos, km) => (60 / (minutos / km)).toFixed(1).replace('.', ',');
 
-function linhaRitmos(sessao) {
-  const r = ritmosDe(sessao);
-  if (!r) return '';
-  const partes = [];
-  if (r.passadeira) partes.push(`<span><em>Passadeira</em> ${escapar(r.passadeira)}</span>`);
-  if (r.rua) partes.push(`<span><em>Rua</em> ${escapar(r.rua)}</span>`);
-  return partes.length ? `<p class="ritmos-sessao">${partes.join('')}</p>` : '';
+/** O ritmo de prova das semanas 9 a 12 é o que ela fizer a 8 de Novembro. */
+function valorRitmoDeProva(modo) {
+  const p = obter().treinos[PROVA] || {};
+  if (!p.tempoMin) return 'ritmo de prova';
+  const km = p.distanciaKm || 10;
+  // Sem unidade em modo passadeira: vai no meio de uma lista de velocidades.
+  return modo === 'rua' ? ritmoPorKm(p.tempoMin, km) : kmhDe(p.tempoMin, km);
+}
+
+/** O alvo da segunda prova: o tempo da primeira menos os 2 a 3 minutos a ganhar. */
+function valorRitmoAlvo(modo) {
+  const p = obter().treinos[PROVA] || {};
+  if (!p.tempoMin) return 'por definir';
+  const km = p.distanciaKm || 10;
+  const lento = p.tempoMin - MELHORIA.min;
+  const rapido = p.tempoMin - MELHORIA.max;
+  return modo === 'rua'
+    ? `${ritmoPorKm(lento, km)} a ${ritmoPorKm(rapido, km)}`
+    : `${kmhDe(lento, km)}-${kmhDe(rapido, km)} km/h`;
+}
+
+function textoPrescricao(texto, modo) {
+  let t = texto;
+  if (modo === 'rua') {
+    t = t.replace(/(\d{1,2},\d)\s*km\/h/g, (_, v) => paceDe(v));
+    t = t.replace(/(\d{1,2},\d)/g, (_, v) => paceDe(v));
+    t = t.replace(/\s*·?\s*inclinação \d+%/g, ''); // não existe na rua
+  }
+  return t
+    .replace(/\{prova\}/g, valorRitmoDeProva(modo))
+    .replace(/\{alvo\}/g, valorRitmoAlvo(modo));
+}
+
+function linhaPrescricao(sessao) {
+  if (!sessao.passadeira) return '';
+  const modo = modoRitmo();
+  return `<p class="passadeira">${modo === 'rua' ? '🛣️' : '🏃'} ${escapar(textoPrescricao(sessao.passadeira, modo))}</p>`;
+}
+
+function selectorModo() {
+  const modo = modoRitmo();
+  return `
+    <div class="modo-ritmo" role="group" aria-label="Mostrar ritmos para">
+      <button type="button" data-modo="passadeira" class="${modo === 'passadeira' ? 'activo' : ''}">🏃 Passadeira</button>
+      <button type="button" data-modo="rua" class="${modo === 'rua' ? 'activo' : ''}">🛣️ Rua</button>
+    </div>`;
 }
 
 function ritmoPorKm(minutos, km) {
@@ -395,9 +431,8 @@ function sessaoHTML(sessao, estado, hoje, semana, pt) {
             </span>` : ''}
         </div>
         <h4>${escapar(sessao.titulo)}${contagem ? ` <span class="contagem-pt">treino ${contagem.n} de ${contagem.total}</span>` : ''}</h4>
-        ${linhaRitmos(sessao)}
         ${sessao.detalhe ? `<p class="detalhe">${escapar(sessao.detalhe)}</p>` : ''}
-        ${sessao.passadeira ? `<p class="passadeira">🏃 ${escapar(sessao.passadeira)}</p>` : ''}
+        ${linhaPrescricao(sessao)}
         ${reg.feito ? resumoRegisto(reg) : ''}
       </div>
     </article>
@@ -560,17 +595,6 @@ function abrirEdicao(id, numSemana, raiz) {
         <input type="text" name="titulo" value="${escapar(v.titulo)}" placeholder="Corrida fácil — 30 min" required>
       </label>
 
-      <div class="par">
-        <label>Ritmo na passadeira
-          <input type="text" name="ritmoPassadeira" placeholder="7,0 km/h"
-            value="${escapar(ritmosDe(v)?.passadeira || '')}">
-        </label>
-        <label>Ritmo na rua
-          <input type="text" name="ritmoRua" placeholder="8:15-8:45/km"
-            value="${escapar(ritmosDe(v)?.rua || '')}">
-        </label>
-      </div>
-
       <label>Indicações
         <textarea name="detalhe" rows="3" placeholder="opcional">${escapar(v.detalhe || '')}</textarea>
       </label>
@@ -617,17 +641,12 @@ function abrirEdicao(id, numSemana, raiz) {
   dialogo.addEventListener('close', () => {
     if (dialogo.returnValue === 'guardar') {
       const f = new FormData(dialogo.querySelector('form'));
-      const pass = (f.get('ritmoPassadeira') || '').trim();
-      const rua = (f.get('ritmoRua') || '').trim();
       const campos = {
         tipo: f.get('tipo'),
         titulo: (f.get('titulo') || '').trim() || TIPO_INFO[f.get('tipo')].label,
         detalhe: (f.get('detalhe') || '').trim(),
         passadeira: (f.get('passadeira') || '').trim(),
         distanciaKm: f.get('distanciaKm') ? Number(f.get('distanciaKm')) : null,
-        // Escrever os ritmos à mão desliga o cálculo automático a partir da prova.
-        ritmos: pass || rua ? { passadeira: pass, rua } : null,
-        ritmoDeProva: false,
       };
       const data = f.get('data');
 
