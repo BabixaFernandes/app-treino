@@ -36,7 +36,7 @@ function diasDaSemana(s) {
 /** Todas as sessões que existem hoje: as do plano que sobraram, já com as edições
  *  por cima, mais as que ela criou. `id` é a identidade da sessão, `data` o dia em
  *  que acontece e `dataPlano` o dia a que pertence — é por esse que os PT contam. */
-function todasAsSessoes() {
+export function todasAsSessoes() {
   const e = obter();
 
   const doPlano = PLANO.flatMap((s) => s.sessoes)
@@ -173,7 +173,7 @@ export function renderTreinos(raiz) {
   });
 
   raiz.querySelectorAll('[data-sessao]').forEach((el) => {
-    el.addEventListener('click', () => abrirRegisto(el.dataset.sessao, raiz));
+    el.addEventListener('click', () => abrirRegisto(el.dataset.sessao, () => renderTreinos(raiz)));
   });
 
   raiz.querySelectorAll('[data-mover]').forEach((el) => {
@@ -719,7 +719,9 @@ function escapar(texto) {
 
 // ---- Registo de uma sessão ----
 
-function abrirRegisto(id, raiz) {
+/** Registo de uma sessão. `aoFechar` corre depois de guardar, para quem chamou
+ *  se redesenhar — é usado pelo separador Treinos e pelo calendário. */
+export function abrirRegisto(id, aoFechar) {
   const sessao = todasAsSessoes().find((x) => x.id === id);
   if (!sessao) return;
   const reg = obter().treinos[id] || {};
@@ -792,7 +794,7 @@ function abrirRegisto(id, raiz) {
         dorCanela: f.get('dorCanela') === 'on',
         notas: (f.get('notas') || '').trim(),
       });
-      renderTreinos(raiz);
+      aoFechar?.();
       if (f.get('dorCanela') === 'on') {
         setTimeout(() => alert(
           'Dor na canela registada.\n\nRegra do plano: se a canela doer no aquecimento, ou ainda doer 24 h depois de correr, não corres no dia seguinte. Cortas a semana e retomas onde estavas.'

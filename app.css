@@ -50,7 +50,7 @@ main { padding: 16px; max-width: 640px; margin: 0 auto; }
 /* ---- Navegação ---- */
 .tabs {
   position: fixed; bottom: 0; left: 0; right: 0; z-index: 20;
-  display: grid; grid-template-columns: repeat(4, 1fr);
+  display: grid; grid-template-columns: repeat(5, 1fr);
   background: rgba(24, 27, 34, .96);
   -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
@@ -157,6 +157,64 @@ main { padding: 16px; max-width: 640px; margin: 0 auto; }
 .etiqueta-fase.cor-verde { color: var(--verde); background: rgba(62, 207, 142, .13); }
 .etiqueta-fase.cor-ouro { color: var(--ouro); background: rgba(255, 210, 74, .13); }
 .etiqueta-fase.cor-roxo { color: var(--roxo); background: rgba(167, 128, 255, .13); }
+
+/* ---- Calendário ---- */
+.nav-data div { line-height: 1.2; }
+.nav-data strong { font-size: 1.05rem; }
+.nav-data button:disabled { opacity: .3; cursor: default; }
+.cartao.calendario { padding: 12px 10px; }
+
+.grelha-mes { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+.cabecalho-mes { margin-bottom: 5px; }
+.cabecalho-mes span {
+  text-align: center; font-size: .6rem; font-weight: 600;
+  color: var(--texto-fraco); text-transform: uppercase; letter-spacing: .05em;
+}
+
+.dia-mes {
+  aspect-ratio: 1; display: flex; flex-direction: column; justify-content: space-between;
+  background: var(--superficie-2); border: 1px solid var(--borda);
+  border-radius: 8px; color: var(--texto); font-family: inherit;
+  padding: 3px 4px 2px; cursor: pointer; overflow: hidden;
+}
+.dia-mes.fora { opacity: .28; }
+.dia-mes.hoje { box-shadow: 0 0 0 2px var(--primaria); }
+.dia-mes.com-dor { background: rgba(255, 95, 86, .2); border-color: var(--vermelho); }
+.dia-mes.fase-menstruacao { border-bottom: 3px solid var(--vermelho); }
+.dia-mes.fase-folicular { border-bottom: 3px solid var(--verde); }
+.dia-mes.fase-ovulacao { border-bottom: 3px solid var(--ouro); }
+.dia-mes.fase-lutea { border-bottom: 3px solid var(--roxo); }
+.dia-mes.fase-projectada { border-bottom-style: dotted; }
+
+.dia-mes .topo { display: flex; align-items: flex-start; justify-content: space-between; gap: 2px; }
+.dia-mes .n { font-size: .74rem; font-weight: 600; line-height: 1; }
+.dia-mes .marcas { display: flex; gap: 2px; }
+.dia-mes .pontos { display: flex; gap: 2px; justify-content: center; padding-bottom: 1px; }
+
+.marca { width: 5px; height: 5px; border-radius: 50%; display: inline-block; }
+.marca.peso { background: var(--primaria); }
+.marca.comida { background: var(--verde); }
+
+.ponto {
+  width: 11px; height: 11px; border-radius: 50%; display: grid; place-items: center;
+  font-size: .5rem; font-style: normal; color: #06121f; font-weight: 700; flex: none;
+}
+.ponto.cor-roxo { background: var(--roxo); }
+.ponto.cor-verde { background: var(--verde); }
+.ponto.cor-azul { background: var(--azul); }
+.ponto.cor-laranja { background: var(--laranja); }
+.ponto.cor-vermelho { background: var(--vermelho); }
+.ponto.cor-ouro { background: var(--ouro); }
+.ponto.cor-cinza { background: var(--cinza); }
+.ponto:not(.feito) { opacity: .45; }
+.sinal-dor { font-style: normal; font-size: .62rem; color: var(--vermelho); line-height: 1; }
+
+.chave-mes { display: flex; flex-wrap: wrap; gap: 6px 12px; margin: 4px 0 8px; }
+.item-chave { display: flex; align-items: center; gap: 5px; font-size: .72rem; color: var(--texto-fraco); }
+
+.feito-em, .aviso-em { display: block; font-style: normal; font-size: .72rem; margin-top: 3px; }
+.feito-em { color: var(--verde); }
+.aviso-em { color: var(--vermelho); }
 
 /* ---- Ciclo ---- */
 .previsao { margin: 0 0 12px !important; text-align: center; }

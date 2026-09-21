@@ -64,6 +64,33 @@ Sim. Cada dispositivo guarda os seus próprios dados, sem qualquer ligação ent
 mesma app, alvos e registos independentes. O plano de treino das 7 semanas é que é comum
 a todos.
 
+## O separador Mês
+
+É o único ecrã onde as quatro coisas que a app guarda por data — treinos, peso, comida e ciclo —
+aparecem no mesmo eixo. Os outros separadores respondem bem a *o que faço hoje*; este responde a
+*como é que este mês está*, e é onde os padrões aparecem: o ritmo semanal das sessões, os dias sem
+registo, as fases do ciclo ao longo do bloco.
+
+Cada dia mostra:
+
+| Marca | O que é |
+|---|---|
+| Ponto colorido | Uma sessão, na cor do tipo. Apagado se ainda não foi feita, com ✓ se foi |
+| Fundo vermelho e ⚠ | Dor na canela registada nesse dia |
+| Cor por baixo | A fase do ciclo — **tracejada** quando é projectada em vez de medida |
+| Ponto azul / verde no topo | Houve pesagem / houve comida registada |
+
+Tocar num dia abre-o: a fase e o dia do ciclo, as sessões com o que ficou registado (tocar numa
+abre o mesmo diálogo de registo do separador Treinos), um campo para o peso daquele dia, e os
+totais de comida contra os alvos.
+
+A navegação limita-se aos meses que o plano cobre — Setembro a Dezembro — em vez de deixar
+navegar para o vazio.
+
+A dor na canela marca **o dia inteiro** e não só o ponto da sessão. Num ponto de 11 px ninguém a
+via, e é o sinal que está acima de tudo na hierarquia do plano: um mês onde se vê logo que houve
+três dias com dor vale mais do que qualquer média.
+
 ## Quando a semana muda
 
 O plano é um ponto de partida, não uma jaula. Cada sessão tem dois botões:
@@ -280,6 +307,7 @@ js/
   vistas/definicoes.js  alvos e calculadora de calorias
   vistas/balanco.js     balanço da semana
   vistas/ciclo.js       separador Ciclo
+  vistas/calendario.js  separador Mês
 ```
 
 Nenhum dado pessoal está no código. Peso, altura, idade e alvos são introduzidos na app
