@@ -1,4 +1,4 @@
-// Plano de treino 10 km — 21 Set a 8 Nov 2026
+﻿// Plano de treino 10 km — 21 Set a 8 Nov 2026
 // Tipos: pt | facil | ergo | intervalos | longa | descanso | prova
 
 // Valores neutros de arranque. Os alvos reais são introduzidos por cada pessoa
@@ -28,8 +28,13 @@ export const RITMOS = [
   { ritmo: '7:00/km', kmh: '8,6', uso: 'Intervalos', destaque: true },
 ];
 
-const PT = (data, titulo = 'PT — força') => ({ data, tipo: 'pt', titulo });
+const PT = (data, titulo = 'PT') => ({ data, tipo: 'pt', titulo });
 const DESC = (data, titulo = 'Descanso') => ({ data, tipo: 'descanso', titulo });
+
+// Ritmos de referência, para se ver o essencial sem abrir a tabela do fim.
+const R_FACIL = { passadeira: '7,0 km/h', rua: '8:15-8:45/km' };
+const R_MUITO_FACIL = { passadeira: '6,7-7,0 km/h', rua: '8:30-9:00/km' };
+const R_INTERVALOS = { passadeira: '8,6 km/h nos blocos', rua: '7:00/km nos blocos' };
 
 export const PLANO = [
   {
@@ -42,8 +47,8 @@ export const PLANO = [
       PT('2026-09-22'),
       {
         data: '2026-09-23', tipo: 'facil', titulo: 'Corrida fácil — 25 a 30 min',
-        duracaoMin: 28,
-        detalhe: 'Ritmo 8:15-8:45/km. Se vieres esmagada dos dois dias de PT, troca por 30 min de caminhada sem culpa nenhuma.',
+        duracaoMin: 28, ritmos: R_FACIL,
+        detalhe: 'Se vieres esmagada dos dois dias de PT, troca por 30 min de caminhada sem culpa nenhuma.',
         passadeira: '5 min a andar a 6,0 · 25 min a 7,0 · 3 min a 5,5 · inclinação 1%',
       },
       PT('2026-09-24'),
@@ -51,7 +56,7 @@ export const PLANO = [
       DESC('2026-09-26'),
       {
         data: '2026-09-27', tipo: 'longa', titulo: 'Corrida longa — 6 km',
-        distanciaKm: 6,
+        distanciaKm: 6, ritmos: R_FACIL,
         detalhe: 'Alterna 9 min a correr com 1 min a andar, seis vezes. Não tentes fazer seguido.',
         passadeira: '9 min a 7,0 / 1 min a 5,5 — seis vezes · inclinação 1% · ~51 min',
       },
@@ -66,7 +71,7 @@ export const PLANO = [
       PT('2026-09-28'),
       {
         data: '2026-09-29', tipo: 'facil', titulo: 'Corrida fácil — 30 min',
-        duracaoMin: 30,
+        duracaoMin: 30, ritmos: R_FACIL,
         detalhe: 'Teste da conversa: tens de conseguir dizer uma frase inteira sem parar para respirar.',
         passadeira: '5 min a 6,0 · 30 min a 7,0 · 3 min a 5,5 · inclinação 1%',
       },
@@ -80,7 +85,7 @@ export const PLANO = [
       DESC('2026-10-03'),
       {
         data: '2026-10-04', tipo: 'longa', titulo: 'Corrida longa — 7 km',
-        distanciaKm: 7,
+        distanciaKm: 7, ritmos: R_FACIL,
         detalhe: 'Tenta seguida. Se precisares, 14 min a correr / 1 min a andar.',
         passadeira: '7,0 km/h · inclinação 1% · ~60 min',
       },
@@ -95,8 +100,7 @@ export const PLANO = [
       PT('2026-10-05'),
       {
         data: '2026-10-06', tipo: 'facil', titulo: 'Corrida fácil — 30 a 35 min',
-        duracaoMin: 33,
-        detalhe: 'Ritmo 8:15-8:45/km.',
+        duracaoMin: 33, ritmos: R_FACIL,
         passadeira: '5 min a 6,0 · 33 min a 7,0 · 3 min a 5,5 · inclinação 1%',
       },
       {
@@ -109,9 +113,9 @@ export const PLANO = [
       DESC('2026-10-10'),
       {
         data: '2026-10-11', tipo: 'longa', titulo: 'Corrida longa — 8 km',
-        distanciaKm: 8,
+        distanciaKm: 8, ritmos: R_FACIL,
         detalhe: 'Seguida, a ritmo fácil. Primeiros 2 km deliberadamente mais lentos — é aqui que se ensaia a prova.',
-        passadeira: 'Na rua: 8:15-8:45/km. Percurso plano, evita cimento.',
+        passadeira: 'Na rua: percurso plano, evita cimento.',
       },
     ],
   },
@@ -124,11 +128,12 @@ export const PLANO = [
       PT('2026-10-12'),
       {
         data: '2026-10-13', tipo: 'facil', titulo: 'Corrida fácil — 30 min',
-        duracaoMin: 30,
+        duracaoMin: 30, ritmos: R_FACIL,
         passadeira: '5 min a 6,0 · 30 min a 7,0 · 3 min a 5,5 · inclinação 1%',
       },
       {
         data: '2026-10-14', tipo: 'intervalos', titulo: 'Primeiros intervalos a correr',
+        ritmos: R_INTERVALOS,
         detalhe: '10 min a trote · 5 × (2 min a 7:00/km / 2 min a andar) · 5 min a trote.',
         passadeira: '10 min a 6,7 · 5 × (2 min a 8,6 / 2 min a 5,5) · 5 min a 6,5 · inclinação 1%',
       },
@@ -137,9 +142,8 @@ export const PLANO = [
       DESC('2026-10-17'),
       {
         data: '2026-10-18', tipo: 'longa', titulo: 'Corrida longa — 6 km',
-        distanciaKm: 6,
+        distanciaKm: 6, ritmos: R_FACIL,
         detalhe: 'Fácil. Semana de alívio — resiste à tentação de fazer mais.',
-        passadeira: 'Na rua: 8:15-8:45/km',
       },
     ],
   },
@@ -152,11 +156,12 @@ export const PLANO = [
       PT('2026-10-19'),
       {
         data: '2026-10-20', tipo: 'facil', titulo: 'Corrida fácil — 35 min',
-        duracaoMin: 35,
+        duracaoMin: 35, ritmos: R_FACIL,
         passadeira: '5 min a 6,0 · 35 min a 7,0 · 3 min a 5,5 · inclinação 1%',
       },
       {
         data: '2026-10-21', tipo: 'intervalos', titulo: 'Intervalos',
+        ritmos: R_INTERVALOS,
         detalhe: '10 min a trote · 5 × (3 min a 7:00/km / 2 min a andar) · 5 min a trote.',
         passadeira: '10 min a 6,7 · 5 × (3 min a 8,6 / 2 min a 5,5) · 5 min a 6,5',
       },
@@ -165,9 +170,9 @@ export const PLANO = [
       DESC('2026-10-24'),
       {
         data: '2026-10-25', tipo: 'longa', titulo: 'Corrida longa — 9 km',
-        distanciaKm: 9,
+        distanciaKm: 9, ritmos: R_FACIL,
         detalhe: 'Fácil. Leva água.',
-        passadeira: 'Na rua: 8:15-8:45/km · ~77 min',
+        passadeira: 'Na rua: ~77 min',
       },
     ],
   },
@@ -180,11 +185,12 @@ export const PLANO = [
       PT('2026-10-26'),
       {
         data: '2026-10-27', tipo: 'facil', titulo: 'Corrida fácil — 35 min',
-        duracaoMin: 35,
+        duracaoMin: 35, ritmos: R_FACIL,
         passadeira: '5 min a 6,0 · 35 min a 7,0 · 3 min a 5,5 · inclinação 1%',
       },
       {
         data: '2026-10-28', tipo: 'intervalos', titulo: 'Intervalos',
+        ritmos: R_INTERVALOS,
         detalhe: '10 min a trote · 6 × (3 min a 7:00/km / 90 s a andar) · 5 min a trote.',
         passadeira: '10 min a 6,7 · 6 × (3 min a 8,6 / 90 s a 5,5) · 5 min a 6,5',
       },
@@ -193,9 +199,9 @@ export const PLANO = [
       DESC('2026-10-31'),
       {
         data: '2026-11-01', tipo: 'longa', titulo: 'Corrida longa — 10 km',
-        distanciaKm: 10,
+        distanciaKm: 10, ritmos: R_FACIL,
         detalhe: 'Não é para fazer tempo. É para o teu corpo e a tua cabeça saberem, uma semana antes, que a distância é possível. Vai devagar de propósito.',
-        passadeira: 'Ritmo fácil, 8:15-8:45/km · ~86 min',
+        passadeira: 'Na rua: ~86 min',
       },
     ],
   },
@@ -208,11 +214,12 @@ export const PLANO = [
       PT('2026-11-02', 'PT leve — pede para aliviar as pernas'),
       {
         data: '2026-11-03', tipo: 'facil', titulo: 'Corrida fácil — 25 min',
-        duracaoMin: 25,
+        duracaoMin: 25, ritmos: R_FACIL,
         passadeira: '5 min a 6,0 · 25 min a 7,0 · 3 min a 5,5',
       },
       {
         data: '2026-11-04', tipo: 'intervalos', titulo: 'Activação',
+        ritmos: { passadeira: '7,8 km/h nos blocos', rua: '7:40/km nos blocos' },
         detalhe: '10 min a trote · 4 × (2 min a ritmo de prova / 2 min a andar) · 5 min a trote.',
         passadeira: '10 min a 6,7 · 4 × (2 min a 7,8 / 2 min a 5,5) · 5 min a 6,5',
       },
@@ -221,7 +228,7 @@ export const PLANO = [
       DESC('2026-11-07', 'Descanso ou 15 min de caminhada'),
       {
         data: '2026-11-08', tipo: 'prova', titulo: 'PROVA — 10 km',
-        distanciaKm: 10,
+        distanciaKm: 10, ritmos: { rua: '8:00 → 7:40 → 7:30/km' },
         detalhe: 'km 1-2 a 8:00/km (mais lento de propósito) · km 3-7 a 7:40/km · km 8-10 a atacar. Se estiveres a ultrapassar pessoas nos primeiros 2 km, vais depressa de mais.',
         passadeira: 'Objectivo: 75 a 78 minutos, a correr do princípio ao fim.',
       },
@@ -239,7 +246,7 @@ export const PLANO = [
       PT('2026-11-09'),
       {
         data: '2026-11-10', tipo: 'facil', titulo: 'Corrida fácil — 25 min',
-        duracaoMin: 25,
+        duracaoMin: 25, ritmos: R_MUITO_FACIL,
         detalhe: 'Muito fácil. Se as pernas ainda estiverem pesadas da prova, caminha os 25 min e não penses mais nisso.',
         passadeira: '5 min a 6,0 · 25 min a 7,0 · 3 min a 5,5 · inclinação 1%',
       },
@@ -249,9 +256,9 @@ export const PLANO = [
       DESC('2026-11-14'),
       {
         data: '2026-11-15', tipo: 'longa', titulo: 'Corrida longa — 6 km, muito fácil',
-        distanciaKm: 6,
-        detalhe: 'Fácil a sério, 8:30/km ou mais lento. Não é para testar nada.',
-        passadeira: 'Na rua: 8:30-9:00/km · ~53 min',
+        distanciaKm: 6, ritmos: R_MUITO_FACIL,
+        detalhe: 'Fácil a sério. Não é para testar nada.',
+        passadeira: 'Na rua: ~53 min',
       },
     ],
   },
@@ -264,11 +271,12 @@ export const PLANO = [
       PT('2026-11-16'),
       {
         data: '2026-11-17', tipo: 'facil', titulo: 'Corrida fácil — 30 min',
-        duracaoMin: 30,
+        duracaoMin: 30, ritmos: R_FACIL,
         passadeira: '5 min a 6,0 · 30 min a 7,0 · 3 min a 5,5 · inclinação 1%',
       },
       {
         data: '2026-11-18', tipo: 'intervalos', titulo: 'Intervalos — 4 × 5 min a ritmo de prova',
+        ritmoDeProva: true, sufixoRitmo: 'nos blocos',
         detalhe: '10 min a trote · 4 × (5 min a ritmo de prova / 2 min a andar) · 5 min a trote. O ritmo de prova é o que fizeste a 8 de Novembro, não o que gostavas de ter feito.',
         passadeira: '10 min a 6,7 · 4 × (5 min ao teu ritmo de prova / 2 min a 5,5) · 5 min a 6,5',
       },
@@ -277,9 +285,9 @@ export const PLANO = [
       DESC('2026-11-21'),
       {
         data: '2026-11-22', tipo: 'longa', titulo: 'Corrida longa — 10 km',
-        distanciaKm: 10,
+        distanciaKm: 10, ritmos: R_FACIL,
         detalhe: 'Fácil do princípio ao fim. A distância já a fizeste em prova — hoje é só rodagem.',
-        passadeira: 'Na rua: 8:15-8:45/km · ~86 min',
+        passadeira: 'Na rua: ~86 min',
       },
     ],
   },
@@ -292,11 +300,12 @@ export const PLANO = [
       PT('2026-11-23'),
       {
         data: '2026-11-24', tipo: 'facil', titulo: 'Corrida fácil — 35 min',
-        duracaoMin: 35,
+        duracaoMin: 35, ritmos: R_FACIL,
         passadeira: '5 min a 6,0 · 35 min a 7,0 · 3 min a 5,5 · inclinação 1%',
       },
       {
         data: '2026-11-25', tipo: 'intervalos', titulo: 'Intervalos — 4 × 6 min a ritmo de prova',
+        ritmoDeProva: true, sufixoRitmo: 'nos blocos',
         detalhe: '10 min a trote · 4 × (6 min a ritmo de prova / 2 min a andar) · 5 min a trote.',
         passadeira: '10 min a 6,7 · 4 × (6 min ao ritmo de prova / 2 min a 5,5) · 5 min a 6,5',
       },
@@ -305,9 +314,9 @@ export const PLANO = [
       DESC('2026-11-28'),
       {
         data: '2026-11-29', tipo: 'longa', titulo: 'Corrida longa — 11 km',
-        distanciaKm: 11,
+        distanciaKm: 11, ritmos: R_FACIL,
         detalhe: 'A mais longa de todo o bloco, e a ritmo fácil. Leva água.',
-        passadeira: 'Na rua: 8:15-8:45/km · ~95 min',
+        passadeira: 'Na rua: ~95 min',
       },
     ],
   },
@@ -320,11 +329,12 @@ export const PLANO = [
       PT('2026-11-30'),
       {
         data: '2026-12-01', tipo: 'facil', titulo: 'Corrida fácil — 35 min',
-        duracaoMin: 35,
+        duracaoMin: 35, ritmos: R_FACIL,
         passadeira: '5 min a 6,0 · 35 min a 7,0 · 3 min a 5,5 · inclinação 1%',
       },
       {
         data: '2026-12-02', tipo: 'intervalos', titulo: 'Intervalos — 3 × 8 min a ritmo de prova',
+        ritmoDeProva: true, sufixoRitmo: 'nos blocos',
         detalhe: '10 min a trote · 3 × (8 min a ritmo de prova / 3 min a andar) · 5 min a trote. Blocos longos, para a cabeça se habituar a estar lá muito tempo.',
         passadeira: '10 min a 6,7 · 3 × (8 min ao ritmo de prova / 3 min a 5,5) · 5 min a 6,5',
       },
@@ -333,9 +343,8 @@ export const PLANO = [
       DESC('2026-12-05'),
       {
         data: '2026-12-06', tipo: 'longa', titulo: 'Corrida longa — 11 km, os últimos 3 a ritmo',
-        distanciaKm: 11,
-        detalhe: '8 km fáceis e os últimos 3 km a ritmo de prova. Vai custar, e é suposto — é o ensaio do final da prova.',
-        passadeira: 'Na rua: 8 km a 8:30/km, depois 3 km ao ritmo de prova.',
+        distanciaKm: 11, ritmoDeProva: true, sufixoRitmo: 'nos últimos 3 km',
+        detalhe: '8 km fáceis a 8:15-8:45/km e os últimos 3 km a ritmo de prova. Vai custar, e é suposto — é o ensaio do final da prova.',
       },
     ],
   },
@@ -348,11 +357,12 @@ export const PLANO = [
       PT('2026-12-07', 'PT leve — pede para aliviar as pernas'),
       {
         data: '2026-12-08', tipo: 'facil', titulo: 'Corrida fácil — 25 min',
-        duracaoMin: 25,
+        duracaoMin: 25, ritmos: R_FACIL,
         passadeira: '5 min a 6,0 · 25 min a 7,0 · 3 min a 5,5',
       },
       {
         data: '2026-12-09', tipo: 'intervalos', titulo: 'Activação — 4 × 2 min a ritmo de prova',
+        ritmoDeProva: true, sufixoRitmo: 'nos blocos',
         detalhe: '10 min a trote · 4 × (2 min a ritmo de prova / 2 min a andar) · 5 min a trote. Curto de propósito: é para lembrar as pernas do ritmo, não para as cansar.',
         passadeira: '10 min a 6,7 · 4 × (2 min ao ritmo de prova / 2 min a 5,5) · 5 min a 6,5',
       },
@@ -361,7 +371,7 @@ export const PLANO = [
       DESC('2026-12-12', 'Descanso ou 15 min de caminhada'),
       {
         data: '2026-12-13', tipo: 'prova', titulo: 'PROVA 2 — 10 km',
-        distanciaKm: 10,
+        distanciaKm: 10, ritmoAlvo: true,
         detalhe: 'O objectivo é bater o tempo de 8 de Novembro. E bate-se da mesma maneira de sempre: os primeiros 2 km mais lentos do que te apetece. Quem ganha tempo no fim é quem o não perdeu no princípio.',
         passadeira: 'Vê o objectivo no topo do separador — sai do tempo que registaste na primeira prova.',
       },

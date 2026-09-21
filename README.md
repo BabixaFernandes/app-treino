@@ -96,6 +96,18 @@ Há dois avisos, que assinalam mas não impedem:
 
 A prova não se edita nem se move.
 
+## Ritmos no cartão
+
+Cada sessão de corrida mostra, logo por baixo do título, o ritmo **na passadeira** e
+**na rua** — para não ser preciso abrir a tabela do fim a meio de um treino.
+
+Nas semanas 9 a 12 o ritmo de referência é *ritmo de prova*, que não é um número decidido
+de antemão: é o que ela fizer a 8 de Novembro. Essas sessões calculam-no a partir do tempo
+registado na primeira prova, e enquanto ele não existir dizem-no em vez de inventar. O cartão
+da segunda prova mostra o ritmo **alvo** — o da primeira menos os 2 a 3 minutos a ganhar.
+
+Escrever os ritmos à mão no editor desliga esse cálculo para essa sessão.
+
 ## Contagem dos treinos de PT
 
 Cada sessão de PT mostra em que número do mês vai — *treino 5 de 8* — e no fim do
