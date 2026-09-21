@@ -102,7 +102,7 @@ export function abrirDefinicoes(aoFechar) {
       </p>
 
       <div class="botoes">
-        ${primeira ? '' : '<button value="cancelar" class="secundario">Cancelar</button>'}
+        ${primeira ? '' : '<button value="cancelar" class="secundario" formnovalidate>Cancelar</button>'}
         <button value="guardar" class="primario" ${primeira ? 'style="grid-column:1/-1"' : ''}>Guardar</button>
       </div>
     </form>`;

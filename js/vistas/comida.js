@@ -273,7 +273,7 @@ function abrirAdicionar(raiz, idLinha = null) {
       ${aEditar ? '<button type="button" class="secundario largo apagar-sessao" id="remover-linha">Remover do diário</button>' : ''}
 
       <div class="botoes">
-        <button value="cancelar" class="secundario">Cancelar</button>
+        <button value="cancelar" class="secundario" formnovalidate>Cancelar</button>
         <button value="guardar" class="primario" id="btn-guardar" ${aEditar ? '' : 'disabled'}>
           ${aEditar ? 'Guardar' : 'Adicionar'}
         </button>
@@ -422,7 +422,7 @@ function abrirCopiarDia(raiz) {
               </button>`;
           }).join('')}
         </div>` : '<p class="legenda">Ainda não há outros dias com comida registada.</p>'}
-      <div class="botoes um"><button value="cancelar" class="secundario">Cancelar</button></div>
+      <div class="botoes um"><button value="cancelar" class="secundario" formnovalidate>Cancelar</button></div>
     </form>`;
 
   document.body.appendChild(dialogo);
@@ -454,7 +454,7 @@ function abrirGuardarRefeicao(slot, raiz) {
       <p class="sub">${itens.length} ${itens.length === 1 ? 'item' : 'itens'} de ${slot.toLowerCase()}, para voltares a aplicar com um toque.</p>
       <label>Nome<input name="nome" required value="${esc(slot)} do dia-a-dia"></label>
       <div class="botoes">
-        <button value="cancelar" class="secundario">Cancelar</button>
+        <button value="cancelar" class="secundario" formnovalidate>Cancelar</button>
         <button value="guardar" class="primario">Guardar</button>
       </div>
     </form>`;
@@ -494,7 +494,7 @@ function abrirRefeicoesGuardadas(raiz) {
            Ainda não guardaste nenhuma. Registas uma refeição como sempre e depois tocas em
            <strong>guardar</strong> no canto do bloco dela — fica disponível aqui.
          </p>`}
-      <div class="botoes um"><button value="cancelar" class="secundario">Fechar</button></div>
+      <div class="botoes um"><button value="cancelar" class="secundario" formnovalidate>Fechar</button></div>
     </form>`;
 
   document.body.appendChild(dialogo);
@@ -541,7 +541,7 @@ function abrirNovoAlimento(raiz) {
       </div>
       <p class="legenda">Com isto preenchido, passas a poder escrever <strong>1 iogurte</strong> em vez de 125 g.</p>
       <div class="botoes">
-        <button value="cancelar" class="secundario">Cancelar</button>
+        <button value="cancelar" class="secundario" formnovalidate>Cancelar</button>
         <button value="guardar" class="primario">Criar</button>
       </div>
     </form>`;

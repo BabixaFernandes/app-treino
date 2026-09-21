@@ -242,7 +242,7 @@ function abrirSintomas(data, raiz) {
         </label>
       `).join('')}
       <div class="botoes">
-        <button value="cancelar" class="secundario">Cancelar</button>
+        <button value="cancelar" class="secundario" formnovalidate>Cancelar</button>
         <button value="guardar" class="primario">Guardar</button>
       </div>
     </form>`;

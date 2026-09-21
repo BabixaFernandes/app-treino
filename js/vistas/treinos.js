@@ -506,7 +506,7 @@ function mostrarTexto(texto) {
       <h3>Copiar o balanço</h3>
       <p class="sub">O telemóvel não deixou copiar automaticamente. Está aqui, selecionado.</p>
       <textarea rows="10" class="texto-balanco"></textarea>
-      <div class="botoes um"><button value="fechar" class="primario">Fechar</button></div>
+      <div class="botoes um"><button value="fechar" class="primario" formnovalidate>Fechar</button></div>
     </form>`;
   document.body.appendChild(d);
   const campo = d.querySelector('textarea');
@@ -527,7 +527,7 @@ function confirmar({ titulo, texto, rotulo = 'Confirmar' }) {
         <h3>${titulo}</h3>
         <p class="sub">${texto}</p>
         <div class="botoes">
-          <button value="nao" class="secundario">Cancelar</button>
+          <button value="nao" class="secundario" formnovalidate>Cancelar</button>
           <button value="sim" class="primario">${rotulo}</button>
         </div>
       </form>`;
@@ -577,7 +577,7 @@ function abrirTroca(id, numSemana, raiz) {
         }).join('')}
       </div>
       <div class="botoes um">
-        <button value="cancelar" class="secundario">Cancelar</button>
+        <button value="cancelar" class="secundario" formnovalidate>Cancelar</button>
       </div>
     </form>
   `;
@@ -663,7 +663,7 @@ function abrirEdicao(id, numSemana, raiz) {
         </button>` : ''}
 
       <div class="botoes">
-        <button value="cancelar" class="secundario">Cancelar</button>
+        <button value="cancelar" class="secundario" formnovalidate>Cancelar</button>
         <button value="guardar" class="primario">Guardar</button>
       </div>
     </form>
@@ -774,7 +774,7 @@ export function abrirRegisto(id, aoFechar) {
       </label>
 
       <div class="botoes">
-        <button value="cancelar" class="secundario">Cancelar</button>
+        <button value="cancelar" class="secundario" formnovalidate>Cancelar</button>
         <button value="guardar" class="primario">Guardar</button>
       </div>
     </form>

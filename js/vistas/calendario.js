@@ -237,7 +237,7 @@ function abrirDia(data, raiz) {
         </p>` : ''}
 
       <div class="botoes">
-        <button value="cancelar" class="secundario">Fechar</button>
+        <button value="cancelar" class="secundario" formnovalidate>Fechar</button>
         <button value="guardar" class="primario">Guardar peso</button>
       </div>
     </form>
