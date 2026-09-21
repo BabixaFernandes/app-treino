@@ -218,12 +218,32 @@ export function mediaSemanal(data) {
 
 // ---- Ciclo menstrual ----
 
-/** Marca (ou desmarca) um dia como primeiro dia de período. */
+// Um período não volta a começar dentro de tantos dias, por isso uma marca nova
+// aqui perto é uma correcção da data e não um período novo.
+const DIAS_MESMO_PERIODO = 10;
+
+const distancia = (a, b) => Math.abs(Math.round((new Date(a) - new Date(b)) / 86400000));
+
+/**
+ * Marca um dia como primeiro dia de período; se já estava marcado, desmarca.
+ * Se houver um início a menos de 10 dias, **corrige-o** em vez de acrescentar outro —
+ * sem isto, corrigir uma data esquecida deixava dois inícios juntos e a média do
+ * ciclo passava a contar um intervalo de dois dias.
+ */
 export function alternarInicioCiclo(data) {
   actualizar((e) => {
-    e.ciclos = e.ciclos.some((c) => c.inicio === data)
-      ? e.ciclos.filter((c) => c.inicio !== data)
-      : [...e.ciclos, { inicio: data, fim: null }].sort((a, b) => a.inicio.localeCompare(b.inicio));
+    if (e.ciclos.some((c) => c.inicio === data)) {
+      e.ciclos = e.ciclos.filter((c) => c.inicio !== data);
+      return;
+    }
+    const perto = e.ciclos.find((c) => distancia(c.inicio, data) <= DIAS_MESMO_PERIODO);
+    if (perto) {
+      perto.inicio = data;
+      if (perto.fim && perto.fim < data) perto.fim = null; // o fim deixou de fazer sentido
+    } else {
+      e.ciclos.push({ inicio: data, fim: null });
+    }
+    e.ciclos.sort((a, b) => a.inicio.localeCompare(b.inicio));
   });
 }
 

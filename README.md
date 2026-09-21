@@ -181,8 +181,25 @@ Nada é assumido quando pode ser medido:
 - As fases **pós-menstruais levam sempre asterisco**, porque sem temperatura ou testes a ovulação
   é estimada e apresentá-la como facto seria desonesto.
 
-Na lista de períodos, a duração é clicável para reabrir um período fechado por erro. O `×` apaga
-o registo todo.
+Na lista de períodos, a duração é clicável para reabrir um período fechado por erro, e mostra
+quantos dias desse ciclo tiveram sintomas fortes. O `×` apaga o registo todo.
+
+**Marcar noutra data.** Os botões rápidos são para hoje, mas há um campo de data para os dias
+esquecidos — e é importante que exista: tudo o que a app calcula sai dessa data, e um início
+errado por dois dias desloca as fases todas. Marcar um início a menos de 10 dias de um já
+registado **corrige-o** em vez de criar outro período; sem essa regra, corrigir uma data deixava
+dois inícios juntos e a média do ciclo passava a contar um intervalo de dois dias.
+
+**Previsão.** O cartão do topo diz quando é previsto o próximo período, e um cartão à parte diz em
+que fase caem as provas de 8 de Novembro e 13 de Dezembro — projectado a partir da média, e
+marcado como projecção. Serve para saber com o que contar, não para mudar o plano.
+
+**Calendário.** O ciclo actual aparece dia a dia, com a fase por baixo de cada dia e a cor do
+fundo a marcar sintomas leves ou fortes. Qualquer dia passado é tocável para registar em atraso.
+
+**Irregularidade.** Quando o ciclo mais curto e o mais longo diferem 5 dias ou mais, a app diz o
+intervalo real e avisa que as fases e a previsão são palpites largos — em vez de apresentar uma
+média com a mesma cara de sempre.
 
 ### Porque é que a app não muda os treinos por causa da fase
 
@@ -197,6 +214,12 @@ Logo: a app **mede e revela o padrão dela**, e não aplica regras de manual. A 
 *O teu padrão* compara ritmo e esforço médios por fase, e **só aparece com dois ciclos
 completos** — antes disso diz quantos faltam, em vez de produzir um número que a levaria a
 mudar treinos sem motivo.
+
+Essa comparação usa **só as corridas fáceis**, e só com duas ou mais na mesma fase. Juntar longas
+e intervalos no mesmo «ritmo médio» dava um número que refletia a distribuição do calendário —
+que tipo de sessão calhou em que fase — e não a fase. As fáceis têm todas o mesmo ritmo prescrito
+e duração parecida, por isso uma diferença entre fases é sinal. A coluna *Fáceis* mostra
+`2 de 3` para o tamanho da amostra ficar à vista.
 
 A única coisa que o balanço semanal diz sobre o ciclo é contexto, e só quando houve falhas ou
 dor na canela **e** dias marcados como fortes: serve para uma semana difícil não ser lida como
