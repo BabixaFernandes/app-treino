@@ -120,6 +120,35 @@ main { padding: 16px; max-width: 640px; margin: 0 auto; }
 .sessao.feita { opacity: .55; }
 .sessao.alerta { border-color: var(--vermelho); }
 
+.sessao.movida { border-left-style: dashed; }
+.sessao .mover {
+  margin-left: auto; background: var(--superficie-2); border: 1px solid var(--borda);
+  color: var(--texto-fraco); border-radius: 8px; width: 36px; height: 32px;
+  font-size: .9rem; line-height: 1; cursor: pointer; flex: none;
+  display: grid; place-items: center; font-family: inherit;
+}
+.sessao .mover:active { background: var(--primaria); color: #06121f; }
+.etiqueta-movida {
+  font-size: .62rem; text-transform: uppercase; letter-spacing: .05em;
+  color: var(--primaria); font-weight: 600;
+}
+.cabecalho-semana .sinal-ajuste { color: var(--primaria); font-size: .85rem; }
+
+.ajustada {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  font-size: .78rem; color: var(--texto-fraco); margin: 0 0 10px;
+}
+.ajustada button {
+  background: none; border: none; padding: 0; cursor: pointer;
+  color: var(--primaria); font-family: inherit; font-size: .78rem;
+  text-decoration: underline;
+}
+.nota.aviso-semana { color: var(--laranja); border-left-color: var(--laranja); }
+
+.opcao .aviso-troca { display: block; font-style: normal; font-size: .72rem; color: var(--laranja); margin-top: 2px; }
+.opcao .seta { color: var(--texto-fraco); flex: none; }
+.botoes.um { grid-template-columns: 1fr; }
+
 .sessao .dia { text-align: center; min-width: 32px; }
 .sessao .ds { display: block; font-size: .66rem; text-transform: uppercase; color: var(--texto-fraco); letter-spacing: .05em; }
 .sessao .dn { display: block; font-size: 1.15rem; font-weight: 600; line-height: 1.1; }

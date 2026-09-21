@@ -6,14 +6,19 @@ import { ALVOS_PADRAO } from './data/plano.js';
 
 const CHAVE = 'treino10k.v1';
 
-const ESTADO_INICIAL = {
-  versao: 1,
-  alvos: { ...ALVOS_PADRAO },
-  treinos: {},    // "2026-09-23": { feito, distanciaKm, tempoMin, esforco, dorCanela, notas }
-  pesos: {},      // "2026-09-21": 95.2
-  alimentos: [],  // { id, nome, kcal, p, h, g, cat }
-  diario: {},     // "2026-09-21": [ { id, alimentoId, gramas, refeicao } ]
-};
+// Função, e não constante: cada chamada devolve objectos novos, para que
+// `treinos`, `ajustes` e companhia nunca fiquem partilhados entre estados.
+function estadoInicial() {
+  return {
+    versao: 1,
+    alvos: { ...ALVOS_PADRAO },
+    treinos: {},    // "2026-09-23": { feito, distanciaKm, tempoMin, esforco, dorCanela, notas }
+    ajustes: {},    // "2026-09-21": "2026-09-23" — sessão movida para outro dia
+    pesos: {},      // "2026-09-21": 95.2
+    alimentos: [],  // { id, nome, kcal, p, h, g, cat }
+    diario: {},     // "2026-09-21": [ { id, alimentoId, gramas, refeicao } ]
+  };
+}
 
 let estado = carregar();
 const ouvintes = new Set();
@@ -21,11 +26,11 @@ const ouvintes = new Set();
 function carregar() {
   try {
     const bruto = localStorage.getItem(CHAVE);
-    if (!bruto) return semear({ ...ESTADO_INICIAL });
+    if (!bruto) return semear(estadoInicial());
     const guardado = JSON.parse(bruto);
-    return { ...ESTADO_INICIAL, ...guardado, alvos: { ...ALVOS_PADRAO, ...(guardado.alvos || {}) } };
+    return { ...estadoInicial(), ...guardado, alvos: { ...ALVOS_PADRAO, ...(guardado.alvos || {}) } };
   } catch {
-    return semear({ ...ESTADO_INICIAL });
+    return semear(estadoInicial());
   }
 }
 
@@ -86,6 +91,32 @@ export function registarTreino(data, dados) {
 
 export function apagarTreino(data) {
   actualizar((e) => { delete e.treinos[data]; });
+}
+
+// ---- Reorganizar a semana ----
+//
+// Cada sessão é identificada pela data que tem no plano original, e é essa a
+// chave usada em `treinos` — assim o registo acompanha a sessão quando ela muda
+// de dia. `ajustes` guarda apenas para onde é que ela foi.
+
+/** O dia em que a sessão acontece realmente. */
+export function dataEfectiva(idSessao) {
+  return estado.ajustes[idSessao] || idSessao;
+}
+
+/** Troca de dia duas sessões. Se a troca as devolve ao lugar original, o ajuste desaparece. */
+export function trocarSessoes(idA, idB) {
+  actualizar((e) => {
+    const diaA = e.ajustes[idA] || idA;
+    const diaB = e.ajustes[idB] || idB;
+    if (diaB === idA) delete e.ajustes[idA]; else e.ajustes[idA] = diaB;
+    if (diaA === idB) delete e.ajustes[idB]; else e.ajustes[idB] = diaA;
+  });
+}
+
+/** Devolve as sessões indicadas aos dias originais do plano. */
+export function reporDias(ids) {
+  actualizar((e) => { ids.forEach((id) => delete e.ajustes[id]); });
 }
 
 // ---- Peso ----
@@ -183,7 +214,7 @@ export function importar(texto) {
   if (!dados || typeof dados !== 'object' || !('versao' in dados)) {
     throw new Error('Este ficheiro não parece ser uma cópia de segurança da app.');
   }
-  estado = { ...ESTADO_INICIAL, ...dados };
+  estado = { ...estadoInicial(), ...dados };
   gravar();
 }
 

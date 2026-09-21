@@ -55,6 +55,24 @@ Sim. Cada dispositivo guarda os seus próprios dados, sem qualquer ligação ent
 mesma app, alvos e registos independentes. O plano de treino das 7 semanas é que é comum
 a todos.
 
+## Quando a semana muda
+
+O PT nem sempre calha nos mesmos dias. Cada sessão tem um botão **⇄** que a troca de dia
+com outra da mesma semana — como todos os sete dias já têm sessão (treino, PT ou descanso),
+mover uma é sempre trocar duas, e a semana nunca fica com dias a dobrar nem vazios.
+
+O que fica registado (distância, tempo, esforço, dor na canela) **acompanha a sessão**, não
+o dia: o registo é guardado com a data original do plano, e os ajustes são guardados à parte.
+Por isso é que *repor o plano original* devolve tudo ao sítio sem perder nada.
+
+Há dois avisos, que assinalam mas não impedem:
+
+- **tira a longa de domingo** — a corrida longa ao domingo é a regra fixa do plano.
+- **dois treinos duros em dias seguidos** — aparece no topo da semana quando uma troca
+  deixa dois dias fortes colados.
+
+A prova não se move.
+
 ## Cópias de segurança
 
 Os dados ficam guardados no próprio dispositivo (`localStorage`), não numa nuvem. Isto quer dizer:
