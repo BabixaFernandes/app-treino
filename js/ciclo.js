@@ -74,6 +74,20 @@ function cicloAplicavel(data) {
   return [...obter().ciclos].reverse().find((c) => c.inicio <= data) || null;
 }
 
+/**
+ * Quanto durou um ciclo. Se já veio o período seguinte, a duração é conhecida e é
+ * essa que se usa — não a média. Sem isto, cada período novo mexia na média global e
+ * reclassificava sessões de meses atrás sem ela tocar em nada.
+ */
+function duracaoDoCiclo(ciclo) {
+  const { ciclos } = obter();
+  const i = ciclos.findIndex((c) => c.inicio === ciclo.inicio);
+  const seguinte = ciclos[i + 1];
+  return seguinte
+    ? { dias: diasEntre(ciclo.inicio, seguinte.inicio), real: true }
+    : { dias: duracaoMedia().dias, real: false };
+}
+
 /** O período que está a decorrer, se houver e se ainda fizer sentido fechá-lo. */
 export function periodoAberto(hoje) {
   const c = cicloAplicavel(hoje);
@@ -90,13 +104,16 @@ export function faseDe(data, projectar = false) {
   const ciclo = cicloAplicavel(data);
   if (!ciclo) return null;
 
-  const { dias: duracao } = duracaoMedia();
+  const doCiclo = duracaoDoCiclo(ciclo);
+  let duracao = doCiclo.dias;
   let inicio = ciclo.inicio;
   let dia = diasEntre(inicio, data) + 1;
   let projectada = false;
 
   if (dia > duracao + 14) {
     if (!projectar) return null;
+    // Para o futuro não há duração conhecida: projecta-se com a média.
+    duracao = duracaoMedia().dias;
     inicio = somaDias(inicio, Math.floor((dia - 1) / duracao) * duracao);
     dia = diasEntre(inicio, data) + 1;
     projectada = true;
@@ -188,7 +205,7 @@ export function padraoPorFase() {
 export function diasDoCiclo(data) {
   const ciclo = cicloAplicavel(data);
   if (!ciclo) return null;
-  const { dias: duracao } = duracaoMedia();
+  const { dias: duracao } = duracaoDoCiclo(ciclo);
   const { sintomas } = obter();
   const dias = [];
   for (let i = 0; i < duracao; i++) {

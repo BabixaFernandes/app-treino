@@ -201,6 +201,25 @@ fundo a marcar sintomas leves ou fortes. Qualquer dia passado é tocável para r
 intervalo real e avisa que as fases e a previsão são palpites largos — em vez de apresentar uma
 média com a mesma cara de sempre.
 
+### Como as médias se comportam ao longo do tempo
+
+As três médias — duração do ciclo, duração do período, e a tabela por fase — recalculam sobre
+**tudo** o que está registado, sem janela nem pesos. Com poucos ciclos é o correcto; se um dia
+houver um ano de dados e um mês estranho estiver a distorcer, aí vale a pena passar a usar só os
+últimos seis.
+
+Mas as fases de um ciclo **não** saem da média global. Saem da duração real desse ciclo, que é o
+intervalo até ao período seguinte:
+
+- Enquanto um ciclo está **aberto** (ainda não veio o período seguinte), as fases dele são
+  estimadas pela média e **vão ser revistas** quando ele fechar. Se o ciclo acabar por durar 35
+  dias em vez de 28, a ovulação passa do dia 14 para o 21 e uma sessão reclassifica-se — porque a
+  estimativa estava errada, não porque a app mudou de ideias.
+- Um ciclo já **fechado** tem duração conhecida e as fases dele **nunca mais mudam**.
+
+Antes esta distinção não existia: todas as fases saíam da média global, e cada período novo
+reclassificava sessões de meses atrás sem ninguém tocar em nada.
+
 ### Porque é que a app não muda os treinos por causa da fase
 
 Porque a evidência não o sustenta. A meta-análise de referência
