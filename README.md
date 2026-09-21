@@ -279,6 +279,25 @@ A única coisa que o balanço semanal diz sobre o ciclo é contexto, e só quand
 dor na canela **e** dias marcados como fortes: serve para uma semana difícil não ser lida como
 perda de forma.
 
+## O separador Peso
+
+**O gráfico tem duas coisas no mesmo eixo:** o peso de cada dia em pontos soltos e a média da
+semana em linha cheia. É a forma de se ver com os olhos que os dentes de 1 a 2 kg de um dia para
+o outro são água, e que a linha por baixo deles é a única coisa que está de facto a acontecer.
+Aparece a partir de três pesagens. Se houver um peso alvo definido e ele couber no que está
+desenhado, entra como linha tracejada; um alvo 8 kg abaixo ficava de fora, porque esmagava a
+evolução toda contra o topo do gráfico.
+
+O eixo do x é **o tempo a sério**, não a ordem dos registos. Uma semana em que não te pesaste tem
+de aparecer como um vazio, e não encolhida até parecer um dia — senão o gráfico mente sobre o
+ritmo. Já a média da semana fica no meio dos dias que essa semana tem, e não na segunda-feira,
+que podia ser um dia sem pesagem nenhuma.
+
+**Registar noutro dia.** O botão abre em *ontem*, que é o caso que traz alguém ali: a pesagem que
+ficou esquecida. Datas futuras não passam. E cada linha dos *Últimos registos* abre-se ao toque
+para corrigir o valor ou apagar a pesagem — a lista mostra também a diferença para o registo
+anterior, que é o número que se procura quando se olha para ela.
+
 ## O separador Comida
 
 O registo alimentar não se abandona por falta de funcionalidades — abandona-se por cansaço. Cada
