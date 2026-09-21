@@ -50,7 +50,7 @@ main { padding: 16px; max-width: 640px; margin: 0 auto; }
 /* ---- Navegação ---- */
 .tabs {
   position: fixed; bottom: 0; left: 0; right: 0; z-index: 20;
-  display: grid; grid-template-columns: repeat(3, 1fr);
+  display: grid; grid-template-columns: repeat(4, 1fr);
   background: rgba(24, 27, 34, .96);
   -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
@@ -149,6 +149,42 @@ main { padding: 16px; max-width: 640px; margin: 0 auto; }
   background: rgba(167, 128, 255, .13); border-radius: 6px;
   padding: 1px 6px; margin-left: 4px; white-space: nowrap;
 }
+.etiqueta-fase {
+  font-size: .62rem; text-transform: uppercase; letter-spacing: .05em;
+  font-weight: 600; border-radius: 6px; padding: 1px 6px; white-space: nowrap;
+}
+.etiqueta-fase.cor-vermelho { color: var(--vermelho); background: rgba(255, 95, 86, .13); }
+.etiqueta-fase.cor-verde { color: var(--verde); background: rgba(62, 207, 142, .13); }
+.etiqueta-fase.cor-ouro { color: var(--ouro); background: rgba(255, 210, 74, .13); }
+.etiqueta-fase.cor-roxo { color: var(--roxo); background: rgba(167, 128, 255, .13); }
+
+/* ---- Ciclo ---- */
+.dia-sintomas { padding: 10px 0; border-bottom: 1px solid var(--borda); }
+.dia-sintomas:last-of-type { border-bottom: none; }
+.rotulo-dia { font-size: .78rem; color: var(--texto-fraco); font-weight: 600; }
+.selects-sintomas { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 6px; }
+.selects-sintomas label { font-size: .7rem; color: var(--texto-fraco); }
+.selects-sintomas select {
+  width: 100%; margin-top: 3px; padding: 8px 6px; border-radius: 9px;
+  background: var(--superficie-2); border: 1px solid var(--borda);
+  color: var(--texto); font-family: inherit; font-size: .85rem;
+}
+.tabela-fases { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: .8rem; }
+.tabela-fases th {
+  text-align: left; color: var(--texto-fraco); font-weight: 600;
+  padding: 6px 4px; border-bottom: 1px solid var(--borda); font-size: .68rem;
+  text-transform: uppercase; letter-spacing: .05em;
+}
+.tabela-fases td { padding: 8px 4px; border-bottom: 1px solid var(--borda); }
+.tabela-fases tr:last-child td { border-bottom: none; }
+.linha-ciclo {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 0; border-bottom: 1px solid var(--borda); font-size: .85rem;
+}
+.linha-ciclo:last-child { border-bottom: none; }
+.linha-ciclo span:first-child { flex: 1; }
+.linha-ciclo .intervalo { color: var(--texto-fraco); font-size: .76rem; }
+
 .etiqueta-movida {
   font-size: .62rem; text-transform: uppercase; letter-spacing: .05em;
   color: var(--primaria); font-weight: 600;

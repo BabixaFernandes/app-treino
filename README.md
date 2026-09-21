@@ -160,6 +160,35 @@ offline como o resto da app. Para uma leitura a sério há o botão **Copiar**, 
 inteira em texto — sessão por sessão — para colar numa conversa com o Claude e pedir o que
 umas regras não conseguem dar. Se o telemóvel não deixar copiar, abre o texto já selecionado.
 
+## Ciclo
+
+O separador **Ciclo** tem um botão para marcar o primeiro dia do período e, opcionalmente,
+dores / cansaço / fluxo em três níveis nos últimos três dias. Daí a app deriva a fase e mostra-a
+como etiqueta em cada sessão de treino, com o dia do ciclo no tooltip.
+
+A duração do ciclo sai da **média dos ciclos dela**, não dos 28 dias por omissão — assumir 28
+é um dos erros metodológicos que a literatura aponta. Sem dois períodos registados usa 28 e
+di-lo. As fases pós-menstruais levam asterisco, porque sem temperatura ou testes a ovulação
+é estimada.
+
+### Porque é que a app não muda os treinos por causa da fase
+
+Porque a evidência não o sustenta. A meta-análise de referência
+([McNulty et al., *Sports Medicine* 2020](https://pubmed.ncbi.nlm.nih.gov/32661839/)) encontra um
+efeito médio **trivial** da fase no desempenho, com grande sobreposição entre fases; uma
+[revisão de 2025 restrita a estudos de metodologia exigente](https://journals.physiology.org/doi/full/10.1152/japplphysiol.00223.2025)
+encontra efeitos em 58% dos estudos mas com direcção e magnitude inconsistentes. O que é
+consistente é a variabilidade individual.
+
+Logo: a app **mede e revela o padrão dela**, e não aplica regras de manual. A secção
+*O teu padrão* compara ritmo e esforço médios por fase, e **só aparece com dois ciclos
+completos** — antes disso diz quantos faltam, em vez de produzir um número que a levaria a
+mudar treinos sem motivo.
+
+A única coisa que o balanço semanal diz sobre o ciclo é contexto, e só quando houve falhas ou
+dor na canela **e** dias marcados como fortes: serve para uma semana difícil não ser lida como
+perda de forma.
+
 ## Cópias de segurança
 
 Os dados ficam guardados no próprio dispositivo (`localStorage`), não numa nuvem. Isto quer dizer:
@@ -187,13 +216,15 @@ servidor.js             servidor estático para desenvolvimento
 js/
   app.js                navegação entre separadores e cópias de segurança
   store.js              leitura e escrita de dados (ponto único)
+  ciclo.js              fases do ciclo e análise por fase
   data/plano.js         as 7 semanas de treino (sem dados pessoais)
   data/alimentos.js     lista inicial de alimentos, por 100 g
   vistas/treinos.js     separador Treinos
   vistas/peso.js        separador Peso
   vistas/comida.js      separador Comida
   vistas/definicoes.js  alvos e calculadora de calorias
-  vistas/balanco.js     balanço de uma semana terminada
+  vistas/balanco.js     balanço da semana
+  vistas/ciclo.js       separador Ciclo
 ```
 
 Nenhum dado pessoal está no código. Peso, altura, idade e alvos são introduzidos na app

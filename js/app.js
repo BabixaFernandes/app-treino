@@ -1,6 +1,7 @@
 import { renderTreinos } from './vistas/treinos.js';
 import { renderPeso } from './vistas/peso.js';
 import { renderComida } from './vistas/comida.js';
+import { renderCiclo } from './vistas/ciclo.js';
 import { abrirDefinicoes } from './vistas/definicoes.js';
 import { exportar, importar, obter } from './store.js';
 
@@ -8,6 +9,7 @@ const VISTAS = {
   treinos: { titulo: 'Treinos', render: renderTreinos },
   peso: { titulo: 'Peso', render: renderPeso },
   comida: { titulo: 'Comida', render: renderComida },
+  ciclo: { titulo: 'Ciclo', render: renderCiclo },
 };
 
 const raiz = document.querySelector('#vista');

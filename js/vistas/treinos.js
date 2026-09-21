@@ -1,5 +1,6 @@
 import { PLANO, TIPO_INFO, RITMOS } from '../data/plano.js';
 import { balancoHTML, balancoTexto } from './balanco.js';
+import { faseDe } from '../ciclo.js';
 import {
   obter, registarTreino, isoData, diaCurto, dataLegivel,
   dataEfectiva, moverSessao, reporSemana, definirModoRitmo,
@@ -439,6 +440,7 @@ function sessaoHTML(sessao, estado, hoje, semana, pt) {
           ${!sessao.extra && sessao.data !== sessao.id ? `<span class="etiqueta-movida">movida de ${diaCurto(sessao.id)}</span>` : ''}
           ${sessao.extra ? '<span class="etiqueta-movida">acrescentada</span>' : ''}
           ${sessao.editada ? '<span class="etiqueta-movida">alterada</span>' : ''}
+          ${etiquetaFase(sessao)}
           ${movivel ? `
             <span class="acoes-sessao">
               <button type="button" class="mover" data-editar="${sessao.id}" data-semana="${semana}"
@@ -454,6 +456,14 @@ function sessaoHTML(sessao, estado, hoje, semana, pt) {
       </div>
     </article>
   `;
+}
+
+/** A fase do ciclo, só como contexto. Não muda nada no plano de propósito. */
+function etiquetaFase(sessao) {
+  if (sessao.tipo === 'descanso') return '';
+  const f = faseDe(sessao.data);
+  if (!f) return '';
+  return `<span class="etiqueta-fase cor-${f.cor}" title="Dia ${f.dia} do ciclo${f.estimada ? ' · fase estimada' : ''}">${f.label}${f.estimada ? '*' : ''}</span>`;
 }
 
 function resumoRegisto(reg) {

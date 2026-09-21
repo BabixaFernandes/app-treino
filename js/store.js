@@ -17,6 +17,8 @@ function estadoInicial() {
     edicoes: {},    // "2026-09-23": { tipo, titulo, detalhe, passadeira, distanciaKm } — campos por cima do plano
     extras: {},     // "x-1758...": { data, tipo, titulo, detalhe, passadeira, distanciaKm } — sessão criada por ela
     pesos: {},      // "2026-09-21": 95.2
+    ciclos: [],     // ["2026-09-18", ...] — primeiro dia de cada período, por ordem
+    sintomas: {},   // "2026-09-19": { dores: 0-2, cansaco: 0-2, fluxo: 0-2 }
     alimentos: [],  // { id, nome, kcal, p, h, g, cat }
     diario: {},     // "2026-09-21": [ { id, alimentoId, gramas, refeicao } ]
   };
@@ -206,6 +208,26 @@ export function mediaSemanal(data) {
   }
   if (!valores.length) return null;
   return { media: valores.reduce((a, b) => a + b, 0) / valores.length, n: valores.length };
+}
+
+// ---- Ciclo menstrual ----
+
+/** Marca (ou desmarca) um dia como primeiro dia de período. */
+export function alternarInicioCiclo(data) {
+  actualizar((e) => {
+    e.ciclos = e.ciclos.includes(data)
+      ? e.ciclos.filter((d) => d !== data)
+      : [...e.ciclos, data].sort();
+  });
+}
+
+export function registarSintomas(data, dados) {
+  actualizar((e) => {
+    const novo = { ...(e.sintomas[data] || {}), ...dados };
+    // Um dia sem nada não fica a ocupar espaço nem a contar como registo.
+    if (Object.values(novo).every((v) => !v)) delete e.sintomas[data];
+    else e.sintomas[data] = novo;
+  });
 }
 
 // ---- Alimentos ----

@@ -3,6 +3,14 @@
 // o botão de copiar manda para uma conversa a sério.
 
 import { obter, mediaSemanal, totaisDoDia, somaDias, diaCurto, dataLegivel } from '../store.js';
+import { faseDe, sintomasFortes } from '../ciclo.js';
+
+const NOME_SINTOMA = { dores: 'dores', cansaco: 'cansaço', fluxo: 'fluxo' };
+
+/** "dores", "dores e fluxo", "dores, fluxo e cansaço" */
+const lista = (a) => (a.length < 2 ? a.join('') : `${a.slice(0, -1).join(', ')} e ${a[a.length - 1]}`);
+
+const nomesSintomas = (fortes) => lista([...new Set(fortes.flatMap((f) => f.quais))].map((k) => NOME_SINTOMA[k] || k));
 
 // O ritmo fácil do plano é 8:15-8:45/km, e correr mais rápido do que isso é o erro
 // central dela. Mas 10 s/km de tolerância sobre o limite, senão o aviso dispara por
@@ -38,11 +46,13 @@ export function calcularBalanco(semana, sessoes, fim, hoje) {
   const canela = treinaveis.filter((s) => reg(s).dorCanela);
 
   const longa = sessoes.find((s) => s.tipo === 'longa' || s.tipo === 'prova');
-  const longaReg = longa ? reg(longa) : null;
+  // O registo da longa só conta depois do dia dela — senão o balanço de hoje
+  // relatava um domingo que ainda não aconteceu.
+  const longaReg = longa && longa.data <= ate ? reg(longa) : null;
 
   // Ritmo médio das corridas fáceis que tenham distância e tempo registados.
   const faceis = sessoes
-    .filter((s) => s.tipo === 'facil')
+    .filter((s) => s.tipo === 'facil' && s.data <= ate)
     .map((s) => reg(s))
     .filter((r) => r.distanciaKm && r.tempoMin);
   const ritmoFacil = faceis.length
@@ -62,9 +72,13 @@ export function calcularBalanco(semana, sessoes, fim, hoje) {
     proteina: totais.length ? totais.reduce((a, t) => a + t.p, 0) / totais.length : null,
   };
 
+  // As fases por que a semana passou, e os dias que ela marcou como fortes.
+  const fases = [...new Set(dias.map((d) => faseDe(d)?.label).filter(Boolean))];
+  const fortes = sintomasFortes(semana.inicio, ate);
+
   return {
     semana, fim, hoje, emCurso, treinaveis, feitas, faltaram, canela,
-    longa, longaReg, ritmoFacil, peso, pesoAnterior, comida, alvos: e.alvos,
+    longa, longaReg, ritmoFacil, peso, pesoAnterior, comida, fases, fortes, alvos: e.alvos,
   };
 }
 
@@ -87,6 +101,16 @@ function veredictos(b) {
       tom: 'mau',
       texto: 'A corrida longa não ficou feita. É a única sessão da semana que não se salta — '
         + 'falhar terças e quartas não tem importância, falhar domingos faz descarrilar o plano.',
+    });
+  }
+
+  // Não é prescrição nem desculpa: é impedir que uma semana difícil seja lida como
+  // perda de forma. Por isso só aparece quando houve mesmo algo a correr mal.
+  if (b.fortes.length && (b.faltaram.length || b.canela.length)) {
+    msgs.push({
+      tom: 'aviso',
+      texto: `${b.fortes.length} ${b.fortes.length === 1 ? 'dia' : 'dias'} com ${nomesSintomas(b.fortes)} forte nesta semana. `
+        + 'Antes de a ler como perda de forma, conta com isso — uma semana assim custa mais pelo mesmo treino.',
     });
   }
 
@@ -178,7 +202,15 @@ const linhas = (b) => [
   ['Canela', b.canela.length ? `${b.canela.length} ${b.canela.length === 1 ? 'registo' : 'registos'} de dor` : 'sem registos'],
   ['Peso', linhaPeso(b)],
   ['Comida', linhaComida(b)],
+  ['Ciclo', linhaCiclo(b)],
 ].filter(([, v]) => v !== null);
+
+function linhaCiclo(b) {
+  if (!b.fases.length) return null;
+  const base = b.fases.join(' → ').toLowerCase();
+  if (!b.fortes.length) return base;
+  return `${base} · ${b.fortes.length} ${b.fortes.length === 1 ? 'dia' : 'dias'} com ${nomesSintomas(b.fortes)} forte`;
+}
 
 /** Aparece na semana a decorrer e nas que já passaram — nunca nas futuras. */
 export function balancoHTML(semana, sessoes, fim, hoje) {
