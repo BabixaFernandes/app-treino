@@ -309,6 +309,18 @@ di-lo em vez de apresentar uma média de três dias como se fosse de sete.
 O alvo de calorias **não muda nos dias de treino**, de propósito: o plano fixa 2100 kcal todos os
 dias, e um alvo que se move sozinho tira a única referência estável que há.
 
+**Água.** Um cartão próprio, acima dos botões. A fila de copos é o registo: tocas no quarto copo
+e o dia fica em quatro — um toque, não seis. Os botões `+ copo`, `+ 500 ml` e `−` somam e
+subtraem para as quantidades que não dão copos redondos, e `…` abre um campo para escrever o
+total exacto. Deixar esse campo em branco **apaga** o registo do dia, que não é a mesma coisa que
+zero: zero é *bebi muito pouco*, apagado é *não registei* — e só os dias registados entram na
+média da semana.
+
+Ao contrário das calorias, o alvo da água **muda com o dia**: 2,0 L num dia parado e 2,5 L num dia
+com treino ou PT. Aqui um alvo que se move faz sentido, porque o que se perde num longão de
+domingo não é comparável a um sábado de descanso. Os três números — alvo base, extra de treino e o
+tamanho do teu copo — estão em *Definições*; mede o copo uma vez e não voltas a pensar nisso.
+
 ## Cópias de segurança
 
 Os dados ficam guardados no próprio dispositivo (`localStorage`), não numa nuvem. Isto quer dizer:

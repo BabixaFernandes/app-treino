@@ -444,6 +444,28 @@ button.apagar-sessao { color: var(--vermelho); border-color: rgba(255, 95, 86, .
 }
 .lista-alimentos { max-height: 340px; overflow-y: auto; margin-top: 10px; }
 
+/* Água */
+.cartao.agua { margin-bottom: 12px; }
+.agua-topo { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
+.agua-topo h4 { margin: 0; }
+.n-agua { font-size: 1.05rem; font-weight: 700; }
+.n-agua.certo { color: var(--verde); }
+.n-agua .legenda { font-weight: 400; }
+.cartao.agua .barra-progresso > div { background: #4db8ff; }
+.copos { display: flex; flex-wrap: wrap; gap: 4px; margin: 10px 0; }
+.copo {
+  flex: 1 1 auto; min-width: 26px; background: none; border: none; cursor: pointer;
+  color: var(--texto-fraco); font-size: 1.2rem; line-height: 1; padding: 6px 0;
+}
+.copo.cheio { color: #4db8ff; }
+.botoes-agua { display: grid; grid-template-columns: 44px 1fr auto 44px; gap: 6px; }
+.botoes-agua button {
+  font-family: inherit; font-size: .82rem; font-weight: 600; cursor: pointer;
+  border-radius: 10px; padding: 10px 6px; color: var(--texto);
+  background: var(--superficie-2); border: 1px solid transparent;
+}
+.botoes-agua .largo-agua { background: rgba(77, 184, 255, .16); color: #9ad6ff; }
+
 .acoes-comida { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
 .acoes-comida button { font-family: inherit; font-size: .84rem; font-weight: 600; border-radius: 11px; padding: 12px 8px; cursor: pointer; border: 1px solid transparent; }
 .acoes-comida #add-comida { grid-column: 1 / -1; background: var(--primaria); color: #06121f; }

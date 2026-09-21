@@ -80,6 +80,17 @@ export function abrirDefinicoes(aoFechar) {
           value="${alvos.gordura}" required></label>
       </div>
 
+      <h4 class="sec">Água</h4>
+      <div class="par">
+        <label>Alvo diário (ml)<input type="number" name="aguaMl" step="100" min="0" inputmode="numeric"
+          value="${alvos.aguaMl ?? 2000}"></label>
+        <label>Mais, em dia de treino (ml)<input type="number" name="aguaExtraTreino" step="100" min="0"
+          inputmode="numeric" value="${alvos.aguaExtraTreino ?? 500}"></label>
+      </div>
+      <label>O teu copo tem (ml)<input type="number" name="copoMl" step="10" min="50" inputmode="numeric"
+        value="${alvos.copoMl ?? 250}"></label>
+      <p class="legenda">O copo é só para registares num toque. Mede o teu uma vez e não voltas a pensar nisso.</p>
+
       <h4 class="sec">Peso</h4>
       <div class="par">
         <label>Peso de partida (kg)<input type="number" name="pesoInicial" id="f-inicial" step="0.1" inputmode="decimal"
@@ -142,6 +153,9 @@ export function abrirDefinicoes(aoFechar) {
         proteina: Number(f.get('proteina')) || 140,
         hidratos: Number(f.get('hidratos')) || 220,
         gordura: Number(f.get('gordura')) || 60,
+        aguaMl: Number(f.get('aguaMl')) || 2000,
+        aguaExtraTreino: Number(f.get('aguaExtraTreino')) || 0,
+        copoMl: Number(f.get('copoMl')) || 250,
         pesoInicial: f.get('pesoInicial') ? Number(f.get('pesoInicial')) : null,
         pesoAlvo: f.get('pesoAlvo') ? Number(f.get('pesoAlvo')) : null,
         ptPorMes: Number(f.get('ptPorMes')) || 0,

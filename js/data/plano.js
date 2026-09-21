@@ -10,6 +10,11 @@ export const ALVOS_PADRAO = {
   gordura: 60,
   pesoInicial: null,
   pesoAlvo: null,
+  // Água, em ml: o alvo de um dia parado, o que se acrescenta num dia com
+  // treino, e o copo com que se conta (para registar num toque).
+  aguaMl: 2000,
+  aguaExtraTreino: 500,
+  copoMl: 250,
   // Quantos PT já tinham sido feitos no mês em que o plano arranca, antes do
   // primeiro dia dele — o plano começa a meio de Setembro e não os conhece.
   ptAntes: 0,

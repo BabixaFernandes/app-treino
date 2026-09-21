@@ -4,7 +4,9 @@ import {
   adicionarAoDiario, removerDoDiario, actualizarNoDiario, adicionarAlimento, apagarAlimento,
   copiarDia, usoDosAlimentos, mediaSemanalComida,
   guardarRefeicao, apagarRefeicaoGuardada, aplicarRefeicao,
+  ajustarAgua, definirAgua, mediaSemanalAgua,
 } from '../store.js';
+import { todasAsSessoes } from './treinos.js';
 
 let dataActiva = isoData();
 
@@ -24,12 +26,25 @@ function textoQuantidade(a, gramas) {
   return `${n1(q).replace(',0', '')} ${q === 1 ? a.porcao.nome : plural(a.porcao)} · ${gramas} g`;
 }
 
+const litros = (ml) => `${(ml / 1000).toFixed(1).replace('.', ',')} L`;
+
+/** Quanta água este dia pede. Num dia de treino pede mais — por isso o alvo é
+ *  do dia, e não um número fixo que ignora se ela correu 12 km ou ficou em casa. */
+function alvoAgua(data, alvos) {
+  const treino = todasAsSessoes().some((s) => s.data === data && s.tipo !== 'descanso' && s.tipo !== 'pt');
+  const pt = todasAsSessoes().some((s) => s.data === data && s.tipo === 'pt');
+  const comEsforco = treino || pt;
+  const extra = comEsforco ? (alvos.aguaExtraTreino || 0) : 0;
+  return { base: alvos.aguaMl || 0, extra, total: (alvos.aguaMl || 0) + extra, comEsforco };
+}
+
 export function renderComida(raiz) {
   const estado = obter();
   const totais = totaisDoDia(dataActiva);
   const alvos = estado.alvos;
   const linhas = estado.diario[dataActiva] || [];
   const semana = mediaSemanalComida(dataActiva);
+  const semanaAgua = mediaSemanalAgua(dataActiva);
 
   raiz.innerHTML = `
     <div class="nav-data">
@@ -60,6 +75,8 @@ export function renderComida(raiz) {
       ? '<div class="cartao aviso"><p><strong>Proteína a ficar para trás.</strong> É ela que impede que o peso perdido venha de músculo. Ainda vais a tempo de corrigir hoje.</p></div>'
       : ''}
 
+    ${cartaoAgua(estado, alvos)}
+
     <div class="acoes-comida">
       <button id="add-comida" class="primario">+ Alimento</button>
       <button id="add-refeicao" class="secundario">Refeição guardada</button>
@@ -71,7 +88,7 @@ export function renderComida(raiz) {
     </div>
     ${linhas.length ? '' : '<div class="cartao vazio"><p>Nada registado neste dia.</p><p class="legenda">Se comeste parecido a outro dia, <strong>copiar um dia</strong> é mais rápido do que voltar a escrever tudo.</p></div>'}
 
-    ${cartaoSemana(semana, alvos)}
+    ${cartaoSemana(semana, semanaAgua, alvos)}
     ${cartaoRefeicoesGuardadas(estado)}
 
     <details class="ritmos">
@@ -99,6 +116,15 @@ export function renderComida(raiz) {
   raiz.querySelector('#add-refeicao').onclick = () => abrirRefeicoesGuardadas(raiz);
   raiz.querySelector('#copiar-dia').onclick = () => abrirCopiarDia(raiz);
   raiz.querySelector('#novo-alimento').onclick = () => abrirNovoAlimento(raiz);
+  raiz.querySelector('#agua-exacta').onclick = () => abrirAgua(raiz);
+
+  raiz.querySelectorAll('[data-agua]').forEach((b) => {
+    b.onclick = () => { ajustarAgua(dataActiva, Number(b.dataset.agua)); renderComida(raiz); };
+  });
+  // Tocar num copo põe o total nesse copo — um toque para "já vou em quatro".
+  raiz.querySelectorAll('[data-copo]').forEach((b) => {
+    b.onclick = () => { definirAgua(dataActiva, Number(b.dataset.copo)); renderComida(raiz); };
+  });
 
   raiz.querySelectorAll('[data-editar-linha]').forEach((b) => {
     b.onclick = () => abrirAdicionar(raiz, b.dataset.editarLinha);
@@ -155,8 +181,93 @@ function blocoRefeicao(nome, linhas) {
     </div>`;
 }
 
-function cartaoSemana(s, alvos) {
-  if (!s.dias) return '';
+// ---- Água ----
+
+function cartaoAgua(estado, alvos) {
+  const bebido = estado.agua[dataActiva] ?? 0;
+  const registado = estado.agua[dataActiva] !== undefined;
+  const alvo = alvoAgua(dataActiva, alvos);
+  const copo = alvos.copoMl || 250;
+  const pct = alvo.total ? Math.min(100, (bebido / alvo.total) * 100) : 0;
+
+  // Um copo por cada copo do alvo, mais um para quando passa dele.
+  const nCopos = Math.min(16, Math.ceil(alvo.total / copo) + (bebido > alvo.total ? 1 : 0));
+  const cheios = Math.floor(bebido / copo);
+
+  const copos = Array.from({ length: nCopos }, (_, i) => {
+    const cheio = i < cheios;
+    const ml = (i + 1) * copo;
+    return `<button type="button" class="copo ${cheio ? 'cheio' : ''}" data-copo="${ml}"
+      aria-label="${i + 1} ${i === 0 ? 'copo' : 'copos'} — ${litros(ml)}">${cheio ? '●' : '○'}</button>`;
+  }).join('');
+
+  return `
+    <div class="cartao agua">
+      <div class="agua-topo">
+        <h4>Água</h4>
+        <span class="n-agua ${registado && bebido >= alvo.total ? 'certo' : ''}">
+          ${registado ? litros(bebido) : '—'} <span class="legenda">de ${litros(alvo.total)}</span>
+        </span>
+      </div>
+      <div class="barra-progresso"><div style="width:${pct}%"></div></div>
+      <div class="copos">${copos}</div>
+      <div class="botoes-agua">
+        <button type="button" data-agua="-${copo}" aria-label="Menos um copo">−</button>
+        <button type="button" data-agua="${copo}" class="largo-agua">+ copo (${copo} ml)</button>
+        <button type="button" data-agua="500">+ 500 ml</button>
+        <button type="button" id="agua-exacta" aria-label="Escrever o valor">…</button>
+      </div>
+      <p class="legenda">
+        ${alvo.comEsforco
+          ? `Dia com treino: mais ${litros(alvo.extra)} do que num dia parado.`
+          : 'Dia sem treino, alvo base.'}
+        ${registado && bebido < alvo.total * 0.5
+          ? ' Estás a menos de metade — o cansaço a meio do dia costuma ser isto antes de ser falta de comida.'
+          : ''}
+      </p>
+    </div>`;
+}
+
+function abrirAgua(raiz) {
+  const actual = obter().agua[dataActiva];
+  const dialogo = document.createElement('dialog');
+  dialogo.className = 'modal';
+  dialogo.innerHTML = `
+    <form method="dialog">
+      <h3>Água do dia</h3>
+      <p class="sub">Total de ${dataActiva === isoData() ? 'hoje' : dataLegivel(dataActiva)}, em mililitros.</p>
+      <label>Total (ml)<input type="number" name="ml" id="ml" step="50" min="0" inputmode="numeric"
+        value="${actual ?? ''}" placeholder="1500"></label>
+      <p class="legenda">Deixa em branco para apagar o registo do dia.</p>
+      <div class="botoes">
+        <button value="cancelar" class="secundario" formnovalidate>Cancelar</button>
+        <button value="guardar" class="primario">Guardar</button>
+      </div>
+    </form>`;
+
+  document.body.appendChild(dialogo);
+  dialogo.showModal();
+  dialogo.querySelector('#ml').select();
+
+  dialogo.addEventListener('close', () => {
+    if (dialogo.returnValue === 'guardar') {
+      const v = dialogo.querySelector('#ml').value.trim();
+      definirAgua(dataActiva, v === '' ? null : v);
+      renderComida(raiz);
+    }
+    dialogo.remove();
+  });
+}
+
+function cartaoSemana(s, sa, alvos) {
+  if (!s.dias && !sa.dias) return '';
+  if (!s.dias) {
+    return `
+      <div class="cartao">
+        <h4>Média da semana</h4>
+        <div class="linhas-pt">${linhaAgua(sa, alvos)}</div>
+      </div>`;
+  }
   const fim = somaDias(s.segunda, 6);
   const poucos = s.dias < 4;
   return `
@@ -174,12 +285,26 @@ function cartaoSemana(s, alvos) {
           <span class="n">${Math.round(s.proteina)} g</span>
           <span class="${s.proteina < alvos.proteina * 0.9 ? 'fora' : 'certo'}">de ${alvos.proteina} g</span>
         </div>
+        ${linhaAgua(sa, alvos)}
       </div>
       <p class="legenda">
         ${poucos
           ? 'Com menos de quatro dias registados, esta média diz pouco.'
           : 'É a média semanal que decide se ajustas as calorias, não o total de um dia.'}
       </p>
+    </div>`;
+}
+
+function linhaAgua(sa, alvos) {
+  if (!sa.dias) return '';
+  const alvo = alvos.aguaMl || 0;
+  return `
+    <div class="linha-pt">
+      <span class="mes">Água</span>
+      <span class="n">${litros(sa.media)}</span>
+      <span class="${sa.media < alvo ? 'fora' : 'certo'}">
+        de ${litros(alvo)}${sa.dias < 7 ? ` · ${sa.dias} ${sa.dias === 1 ? 'dia' : 'dias'}` : ''}
+      </span>
     </div>`;
 }
 

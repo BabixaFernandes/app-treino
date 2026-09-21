@@ -22,6 +22,7 @@ function estadoInicial() {
     alimentos: [],  // { id, nome, kcal, p, h, g, cat, porcao }
     diario: {},     // "2026-09-21": [ { id, alimentoId, gramas, refeicao } ]
     refeicoes: [],  // { id, nome, itens: [ { alimentoId, gramas } ] } — refeições guardadas
+    agua: {},       // "2026-09-21": 1750 — total do dia em ml
   };
 }
 
@@ -388,6 +389,41 @@ export function mediaSemanalComida(data) {
     segunda,
     kcal: totais.reduce((a, t) => a + t.kcal, 0) / totais.length,
     proteina: totais.reduce((a, t) => a + t.p, 0) / totais.length,
+  };
+}
+
+// ---- Água ----
+
+/** Soma (ou subtrai) ml ao dia. Nunca desce abaixo de zero. */
+export function ajustarAgua(data, ml) {
+  actualizar((e) => {
+    e.agua[data] = Math.max(0, (e.agua[data] || 0) + ml);
+  });
+}
+
+/** Põe o total do dia. `null` apaga o registo — que não é o mesmo que zero:
+ *  zero é "bebi muito pouco", apagado é "não registei". */
+export function definirAgua(data, ml) {
+  actualizar((e) => {
+    if (ml === null || ml === '' || Number.isNaN(Number(ml))) delete e.agua[data];
+    else e.agua[data] = Math.max(0, Math.round(Number(ml)));
+  });
+}
+
+/** Média de água na semana (segunda a domingo) que contém `data`.
+ *  Conta só os dias com registo, pela mesma razão que a comida. */
+export function mediaSemanalAgua(data) {
+  const d = new Date(data + 'T12:00:00');
+  const segunda = somaDias(data, -((d.getDay() + 6) % 7));
+  const dias = Array.from({ length: 7 }, (_, i) => somaDias(segunda, i))
+    .filter((x) => estado.agua[x] !== undefined);
+
+  if (!dias.length) return { dias: 0, deDias: 7, segunda, media: 0 };
+  return {
+    dias: dias.length,
+    deDias: 7,
+    segunda,
+    media: dias.reduce((a, x) => a + estado.agua[x], 0) / dias.length,
   };
 }
 
