@@ -1,18 +1,67 @@
 import { PLANO, TIPO_INFO, RITMOS } from '../data/plano.js';
 import {
   obter, registarTreino, isoData, diaCurto, dataLegivel,
-  dataEfectiva, trocarSessoes, reporDias,
+  dataEfectiva, moverSessao, reporSemana,
+  editarSessao, reporConteudo, editarExtra, criarSessao, apagarSessao,
 } from '../store.js';
 
 const PROVA = '2026-11-08';
 const DUROS = ['ergo', 'intervalos', 'longa', 'prova'];
 
-/** As sessões da semana pelos dias em que acontecem, já com os ajustes aplicados.
- *  `id` é a data original (a identidade da sessão); `data` é o dia real. */
+/** Os tipos que ela pode escolher ao editar. A prova não está aqui de propósito. */
+const TIPOS_EDITAVEIS = ['pt', 'facil', 'ergo', 'intervalos', 'longa', 'descanso'];
+
+const somaDias = (iso, n) => {
+  const d = new Date(iso + 'T12:00:00');
+  d.setDate(d.getDate() + n);
+  return isoData(d);
+};
+
+const fimDaSemana = (s) => somaDias(s.inicio, 6);
+
+/** Os sete dias de uma semana do plano. */
+const diasDaSemana = (s) => Array.from({ length: 7 }, (_, i) => somaDias(s.inicio, i));
+
+/** Todas as sessões que existem hoje: as do plano que sobraram, já com as edições
+ *  por cima, mais as que ela criou. `id` é a identidade da sessão, `data` o dia em
+ *  que acontece e `dataPlano` o dia a que pertence — é por esse que os PT contam. */
+function todasAsSessoes() {
+  const e = obter();
+
+  const doPlano = PLANO.flatMap((s) => s.sessoes)
+    .filter((x) => !e.removidas[x.data])
+    .map((x) => ({
+      ...x,
+      ...(e.edicoes[x.data] || {}),
+      id: x.data,
+      dataPlano: x.data,
+      data: dataEfectiva(x.data),
+      extra: false,
+      editada: !!e.edicoes[x.data],
+    }));
+
+  const extras = Object.entries(e.extras).map(([id, x]) => ({
+    ...x, id, dataPlano: x.data, extra: true, editada: false,
+  }));
+
+  return [...doPlano, ...extras];
+}
+
+/** As sessões que caem dentro de uma semana, pela ordem dos dias. */
 function sessoesDaSemana(s) {
-  return s.sessoes
-    .map((x) => ({ ...x, id: x.data, data: dataEfectiva(x.data) }))
+  const fim = fimDaSemana(s);
+  return todasAsSessoes()
+    .filter((x) => x.data >= s.inicio && x.data <= fim)
     .sort((a, b) => a.data.localeCompare(b.data));
+}
+
+/** Os ids das sessões que uma semana contém, para a poder repor por inteiro. */
+function idsDaSemana(s) {
+  const naSemana = sessoesDaSemana(s);
+  return {
+    plano: [...new Set([...s.sessoes.map((x) => x.data), ...naSemana.filter((x) => !x.extra).map((x) => x.id)])],
+    extra: naSemana.filter((x) => x.extra).map((x) => x.id),
+  };
 }
 
 function eDomingo(iso) {
@@ -26,7 +75,7 @@ const nomeMes = (mes) => MESES_LONGOS[Number(mes.slice(5, 7)) - 1];
 
 /** O último dia que o plano cobre. Depois disto não há informação nenhuma. */
 function fimDoPlano() {
-  return PLANO.flatMap((s) => s.sessoes.map((x) => dataEfectiva(x.data))).sort().pop();
+  return fimDaSemana(PLANO[PLANO.length - 1]);
 }
 
 /** Numera as sessões de PT dentro de cada mês e resume cada mês face ao pacote.
@@ -41,10 +90,10 @@ function contagemPT() {
   const fim = fimDoPlano();
 
   const porMes = {};
-  PLANO.flatMap((s) => s.sessoes)
+  todasAsSessoes()
     .filter((x) => x.tipo === 'pt')
-    .sort((a, b) => a.data.localeCompare(b.data))
-    .forEach((p) => { (porMes[p.data.slice(0, 7)] ||= []).push(p.data); });
+    .sort((a, b) => a.dataPlano.localeCompare(b.dataPlano))
+    .forEach((p) => { (porMes[p.dataPlano.slice(0, 7)] ||= []).push(p.id); });
 
   const mapa = {};
   const meses = Object.entries(porMes).map(([mes, ids]) => {
@@ -116,16 +165,29 @@ export function renderTreinos(raiz) {
     });
   });
 
+  raiz.querySelectorAll('[data-editar]').forEach((el) => {
+    el.addEventListener('click', (ev) => {
+      ev.stopPropagation();
+      abrirEdicao(el.dataset.editar, Number(el.dataset.semana), raiz);
+    });
+  });
+
+  raiz.querySelectorAll('[data-nova]').forEach((el) => {
+    el.addEventListener('click', () => abrirEdicao(null, Number(el.dataset.nova), raiz));
+  });
+
   raiz.querySelectorAll('[data-repor]').forEach((el) => {
     el.addEventListener('click', () => {
       const semana = PLANO.find((s) => s.semana === Number(el.dataset.repor));
-      reporDias(semana.sessoes.map((x) => x.data));
+      if (!confirm('Repor esta semana como está no plano?\n\nOs dias, as alterações que fizeste e as sessões que acrescentaste voltam atrás. Os registos das sessões do plano mantêm-se.')) return;
+      const ids = idsDaSemana(semana);
+      reporSemana(ids.plano, ids.extra);
       renderTreinos(raiz);
     });
   });
 
   // Abre a semana actual e fecha as outras
-  const semanaActual = PLANO.find((s) => s.sessoes.some((x) => dataEfectiva(x.data) >= hoje)) || PLANO[PLANO.length - 1];
+  const semanaActual = PLANO.find((s) => fimDaSemana(s) >= hoje) || PLANO[PLANO.length - 1];
   PLANO.forEach((s) => {
     if (s.semana !== semanaActual.semana) {
       raiz.querySelector(`#semana-${s.semana}`)?.classList.add('fechada');
@@ -136,9 +198,13 @@ export function renderTreinos(raiz) {
 
 function cabecalho(hoje) {
   const dias = Math.round((new Date(PROVA) - new Date(hoje)) / 86400000);
-  const total = PLANO.flatMap((s) => s.sessoes).filter((s) => s.tipo !== 'descanso').length;
-  const feitos = Object.values(obter().treinos).filter((t) => t.feito).length;
-  const pct = Math.round((feitos / total) * 100);
+  // Conta as sessões que existem agora, e não as do plano: ela pode ter apagado
+  // umas e acrescentado outras.
+  const sessoes = todasAsSessoes().filter((s) => s.tipo !== 'descanso');
+  const treinos = obter().treinos;
+  const feitos = sessoes.filter((s) => treinos[s.id]?.feito).length;
+  const total = sessoes.length;
+  const pct = total ? Math.round((feitos / total) * 100) : 0;
 
   return `
     <div class="destaque">
@@ -154,9 +220,9 @@ function cabecalho(hoje) {
 
 function semanaHTML(s, estado, hoje, pt) {
   const lista = sessoesDaSemana(s);
-  const fim = lista[lista.length - 1].data;
-  const activa = hoje >= s.inicio && hoje <= fim;
-  const ajustada = lista.some((x) => x.data !== x.id);
+  const activa = hoje >= s.inicio && hoje <= fimDaSemana(s);
+  const ajustada = lista.some((x) => x.extra || x.editada || x.data !== x.id)
+    || s.sessoes.some((x) => estado.removidas[x.data]);
   const aviso = avisoDaSemana(lista);
 
   return `
@@ -171,11 +237,13 @@ function semanaHTML(s, estado, hoje, pt) {
         ${s.nota ? `<p class="nota">${s.nota}</p>` : ''}
         ${ajustada ? `
           <p class="ajustada">
-            Semana reorganizada
+            Semana alterada
             <button type="button" data-repor="${s.semana}">repor o plano original</button>
           </p>` : ''}
         ${aviso ? `<p class="nota aviso-semana">⚠ ${aviso}</p>` : ''}
         ${lista.map((x) => sessaoHTML(x, estado, hoje, s.semana, pt)).join('')}
+        ${lista.length ? '' : '<p class="legenda vazia-semana">Semana sem sessões.</p>'}
+        <button type="button" class="nova-sessao" data-nova="${s.semana}">+ Acrescentar sessão</button>
       </div>
     </section>
   `;
@@ -188,9 +256,12 @@ function avisoDaSemana(lista) {
     const actual = lista[i];
     if (!DUROS.includes(anterior.tipo) || !DUROS.includes(actual.tipo)) continue;
     const dias = (new Date(actual.data) - new Date(anterior.data)) / 86400000;
+    const par = `${TIPO_INFO[anterior.tipo].label} e ${TIPO_INFO[actual.tipo].label}`;
+    if (dias === 0) {
+      return `${par} ficaram no mesmo dia (${diaCurto(actual.data)}). São dois treinos duros de uma vez.`;
+    }
     if (dias === 1) {
-      return `${TIPO_INFO[anterior.tipo].label} e ${TIPO_INFO[actual.tipo].label} ficaram em dias seguidos `
-        + `(${diaCurto(anterior.data)} e ${diaCurto(actual.data)}). `
+      return `${par} ficaram em dias seguidos (${diaCurto(anterior.data)} e ${diaCurto(actual.data)}). `
         + 'Se vieres cansada ou a canela reclamar, o segundo passa a fácil ou a descanso.';
     }
   }
@@ -208,7 +279,7 @@ function sessaoHTML(sessao, estado, hoje, semana, pt) {
     sessao.data === hoje ? 'hoje' : '',
     reg.feito ? 'feita' : '',
     reg.dorCanela ? 'alerta' : '',
-    sessao.data !== sessao.id ? 'movida' : '',
+    !sessao.extra && sessao.data !== sessao.id ? 'movida' : '',
   ].filter(Boolean).join(' ');
 
   return `
@@ -222,13 +293,20 @@ function sessaoHTML(sessao, estado, hoje, semana, pt) {
           <span class="etiqueta">${info.label}</span>
           ${reg.feito ? '<span class="visto">✓</span>' : ''}
           ${reg.dorCanela ? '<span class="aviso">⚠ canela</span>' : ''}
-          ${sessao.data !== sessao.id ? `<span class="etiqueta-movida">movida de ${diaCurto(sessao.id)}</span>` : ''}
-          ${movivel ? `<button type="button" class="mover" data-mover="${sessao.id}" data-semana="${semana}"
-             aria-label="Trocar de dia" title="Trocar de dia">⇄</button>` : ''}
+          ${!sessao.extra && sessao.data !== sessao.id ? `<span class="etiqueta-movida">movida de ${diaCurto(sessao.id)}</span>` : ''}
+          ${sessao.extra ? '<span class="etiqueta-movida">acrescentada</span>' : ''}
+          ${sessao.editada ? '<span class="etiqueta-movida">alterada</span>' : ''}
+          ${movivel ? `
+            <span class="acoes-sessao">
+              <button type="button" class="mover" data-editar="${sessao.id}" data-semana="${semana}"
+                aria-label="Editar sessão" title="Editar sessão">✎</button>
+              <button type="button" class="mover" data-mover="${sessao.id}" data-semana="${semana}"
+                aria-label="Trocar de dia" title="Trocar de dia">⇄</button>
+            </span>` : ''}
         </div>
-        <h4>${sessao.titulo}${contagem ? ` <span class="contagem-pt">treino ${contagem.n} de ${contagem.total}</span>` : ''}</h4>
-        ${sessao.detalhe ? `<p class="detalhe">${sessao.detalhe}</p>` : ''}
-        ${sessao.passadeira ? `<p class="passadeira">🏃 ${sessao.passadeira}</p>` : ''}
+        <h4>${escapar(sessao.titulo)}${contagem ? ` <span class="contagem-pt">treino ${contagem.n} de ${contagem.total}</span>` : ''}</h4>
+        ${sessao.detalhe ? `<p class="detalhe">${escapar(sessao.detalhe)}</p>` : ''}
+        ${sessao.passadeira ? `<p class="passadeira">🏃 ${escapar(sessao.passadeira)}</p>` : ''}
         ${reg.feito ? resumoRegisto(reg) : ''}
       </div>
     </article>
@@ -245,7 +323,7 @@ function resumoRegisto(reg) {
   }
   if (reg.esforco) partes.push(`esforço ${reg.esforco}/5`);
   if (!partes.length && !reg.notas) return '';
-  return `<div class="registo">${partes.join(' · ')}${reg.notas ? `<br><em>${reg.notas}</em>` : ''}</div>`;
+  return `<div class="registo">${partes.join(' · ')}${reg.notas ? `<br><em>${escapar(reg.notas)}</em>` : ''}</div>`;
 }
 
 function tabelaRitmos() {
@@ -268,6 +346,12 @@ function tabelaRitmos() {
 
 // ---- Trocar uma sessão de dia ----
 
+/** As sessões do plano mudam de dia por ajuste; as acrescentadas guardam o dia nelas. */
+function porSessaoNoDia(sessao, data) {
+  if (sessao.extra) editarExtra(sessao.id, { data });
+  else moverSessao(sessao.id, data);
+}
+
 function abrirTroca(id, numSemana, raiz) {
   const semana = PLANO.find((s) => s.semana === numSemana);
   const lista = sessoesDaSemana(semana);
@@ -279,7 +363,7 @@ function abrirTroca(id, numSemana, raiz) {
   dialogo.innerHTML = `
     <form method="dialog">
       <h3>Trocar de dia</h3>
-      <p class="sub">${sessao.titulo} — está em ${dataLegivel(sessao.data)}</p>
+      <p class="sub">${escapar(sessao.titulo)} — está em ${dataLegivel(sessao.data)}</p>
       <h4 class="sec">Trocar com</h4>
       <div class="resultados">
         ${outras.map((alvo) => {
@@ -288,7 +372,7 @@ function abrirTroca(id, numSemana, raiz) {
             <button type="button" class="opcao" data-troca="${alvo.id}">
               <span>
                 <strong>${diaCurto(alvo.data)} ${Number(alvo.data.slice(8))}</strong>
-                — ${alvo.titulo}
+                — ${escapar(alvo.titulo)}
                 ${aviso ? `<em class="aviso-troca">${aviso}</em>` : ''}
               </span>
               <span class="seta">⇄</span>
@@ -306,7 +390,10 @@ function abrirTroca(id, numSemana, raiz) {
 
   dialogo.querySelectorAll('[data-troca]').forEach((el) => {
     el.addEventListener('click', () => {
-      trocarSessoes(id, el.dataset.troca);
+      const alvo = outras.find((x) => x.id === el.dataset.troca);
+      const dia = sessao.data;
+      porSessaoNoDia(sessao, alvo.data);
+      porSessaoNoDia(alvo, dia);
       dialogo.close();
       renderTreinos(raiz);
     });
@@ -322,20 +409,136 @@ function avisoDaTroca(sessao, alvo) {
   return null;
 }
 
-// ---- Registo de uma sessão ----
+// ---- Editar, criar e apagar uma sessão ----
 
-function abrirRegisto(id, raiz) {
-  const sessao = PLANO.flatMap((s) => s.sessoes).find((x) => x.data === id);
-  const reg = obter().treinos[id] || {};
-  const corrida = ['facil', 'intervalos', 'longa', 'prova'].includes(sessao.tipo);
-  const data = dataEfectiva(id);
+function abrirEdicao(id, numSemana, raiz) {
+  const semana = PLANO.find((s) => s.semana === numSemana);
+  const sessao = id ? todasAsSessoes().find((x) => x.id === id) : null;
+  const nova = !sessao;
+  const original = id ? semana.sessoes.find((x) => x.data === id) : null;
+
+  const v = sessao || { tipo: 'facil', titulo: '', detalhe: '', passadeira: '', data: semana.inicio };
 
   const dialogo = document.createElement('dialog');
   dialogo.className = 'modal';
   dialogo.innerHTML = `
     <form method="dialog">
-      <h3>${sessao.titulo}</h3>
-      <p class="sub">${dataLegivel(data)}${data !== id ? ` · movida de ${dataLegivel(id)}` : ''}</p>
+      <h3>${nova ? 'Nova sessão' : 'Editar sessão'}</h3>
+      <p class="sub">Semana ${semana.semana} — ${semana.titulo}</p>
+
+      <label>Dia
+        <select name="data">
+          ${diasDaSemana(semana).map((d) => `
+            <option value="${d}" ${d === v.data ? 'selected' : ''}>${dataLegivel(d)}</option>`).join('')}
+        </select>
+      </label>
+
+      <label>Tipo
+        <select name="tipo">
+          ${TIPOS_EDITAVEIS.map((t) => `
+            <option value="${t}" ${t === v.tipo ? 'selected' : ''}>${TIPO_INFO[t].label}</option>`).join('')}
+        </select>
+      </label>
+
+      <label>Título
+        <input type="text" name="titulo" value="${escapar(v.titulo)}" placeholder="Corrida fácil — 30 min" required>
+      </label>
+
+      <label>Indicações
+        <textarea name="detalhe" rows="3" placeholder="opcional">${escapar(v.detalhe || '')}</textarea>
+      </label>
+
+      <label>Passadeira / ritmos
+        <textarea name="passadeira" rows="2" placeholder="opcional">${escapar(v.passadeira || '')}</textarea>
+      </label>
+
+      <label>Distância prevista (km)
+        <input type="number" name="distanciaKm" step="0.1" inputmode="decimal" value="${v.distanciaKm ?? ''}">
+      </label>
+
+      ${!nova ? `
+        <button type="button" class="secundario largo apagar-sessao" id="e-apagar">
+          Apagar esta sessão
+        </button>` : ''}
+      ${original && sessao.editada ? `
+        <button type="button" class="secundario largo" id="e-repor">
+          Repor o conteúdo do plano
+        </button>` : ''}
+
+      <div class="botoes">
+        <button value="cancelar" class="secundario">Cancelar</button>
+        <button value="guardar" class="primario">Guardar</button>
+      </div>
+    </form>
+  `;
+
+  document.body.appendChild(dialogo);
+  dialogo.showModal();
+
+  dialogo.querySelector('#e-apagar')?.addEventListener('click', () => {
+    const aviso = sessao.extra
+      ? 'Apagar esta sessão? O que estiver registado nela perde-se.'
+      : 'Apagar esta sessão do plano?\n\nPodes trazê-la de volta com "repor o plano original" no topo da semana.';
+    if (!confirm(aviso)) return;
+    apagarSessao(sessao.id);
+    dialogo.close();
+    renderTreinos(raiz);
+  });
+
+  dialogo.querySelector('#e-repor')?.addEventListener('click', () => {
+    reporConteudo(sessao.id);
+    dialogo.close();
+    renderTreinos(raiz);
+  });
+
+  dialogo.addEventListener('close', () => {
+    if (dialogo.returnValue === 'guardar') {
+      const f = new FormData(dialogo.querySelector('form'));
+      const campos = {
+        tipo: f.get('tipo'),
+        titulo: (f.get('titulo') || '').trim() || TIPO_INFO[f.get('tipo')].label,
+        detalhe: (f.get('detalhe') || '').trim(),
+        passadeira: (f.get('passadeira') || '').trim(),
+        distanciaKm: f.get('distanciaKm') ? Number(f.get('distanciaKm')) : null,
+      };
+      const data = f.get('data');
+
+      if (nova) {
+        criarSessao({ ...campos, data });
+      } else if (sessao.extra) {
+        editarExtra(sessao.id, { ...campos, data });
+      } else {
+        editarSessao(sessao.id, campos);
+        moverSessao(sessao.id, data);
+      }
+      renderTreinos(raiz);
+    }
+    dialogo.remove();
+  });
+}
+
+/** O título e as indicações são texto dela e vão para dentro de HTML. */
+function escapar(texto) {
+  return String(texto ?? '').replace(/[&<>"]/g, (c) => (
+    { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]
+  ));
+}
+
+// ---- Registo de uma sessão ----
+
+function abrirRegisto(id, raiz) {
+  const sessao = todasAsSessoes().find((x) => x.id === id);
+  if (!sessao) return;
+  const reg = obter().treinos[id] || {};
+  const corrida = ['facil', 'intervalos', 'longa', 'prova'].includes(sessao.tipo);
+  const data = sessao.data;
+
+  const dialogo = document.createElement('dialog');
+  dialogo.className = 'modal';
+  dialogo.innerHTML = `
+    <form method="dialog">
+      <h3>${escapar(sessao.titulo)}</h3>
+      <p class="sub">${dataLegivel(data)}${!sessao.extra && data !== id ? ` · movida de ${dataLegivel(id)}` : ''}</p>
 
       <label class="check">
         <input type="checkbox" name="feito" ${reg.feito ? 'checked' : ''}>
@@ -372,7 +575,7 @@ function abrirRegisto(id, raiz) {
       ` : ''}
 
       <label>Notas
-        <textarea name="notas" rows="2" placeholder="opcional">${reg.notas ?? ''}</textarea>
+        <textarea name="notas" rows="2" placeholder="opcional">${escapar(reg.notas ?? '')}</textarea>
       </label>
 
       <div class="botoes">

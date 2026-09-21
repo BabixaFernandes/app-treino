@@ -121,8 +121,9 @@ main { padding: 16px; max-width: 640px; margin: 0 auto; }
 .sessao.alerta { border-color: var(--vermelho); }
 
 .sessao.movida { border-left-style: dashed; }
+.acoes-sessao { margin-left: auto; display: flex; gap: 5px; flex: none; }
 .sessao .mover {
-  margin-left: auto; background: var(--superficie-2); border: 1px solid var(--borda);
+  background: var(--superficie-2); border: 1px solid var(--borda);
   color: var(--texto-fraco); border-radius: 8px; width: 36px; height: 32px;
   font-size: .9rem; line-height: 1; cursor: pointer; flex: none;
   display: grid; place-items: center; font-family: inherit;
@@ -149,6 +150,14 @@ main { padding: 16px; max-width: 640px; margin: 0 auto; }
   text-decoration: underline;
 }
 .nota.aviso-semana { color: var(--laranja); border-left-color: var(--laranja); }
+.vazia-semana { text-align: center; margin: 4px 0 10px; }
+.nova-sessao {
+  width: 100%; background: none; border: 1px dashed var(--borda);
+  color: var(--texto-fraco); border-radius: 10px; padding: 11px;
+  font-family: inherit; font-size: .84rem; cursor: pointer; margin-top: 2px;
+}
+.nova-sessao:active { border-color: var(--primaria); color: var(--primaria); }
+button.apagar-sessao { color: var(--vermelho); border-color: rgba(255, 95, 86, .35); }
 
 .opcao .aviso-troca { display: block; font-style: normal; font-size: .72rem; color: var(--laranja); margin-top: 2px; }
 .opcao .seta { color: var(--texto-fraco); flex: none; }

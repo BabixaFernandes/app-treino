@@ -57,21 +57,28 @@ a todos.
 
 ## Quando a semana muda
 
-O PT nem sempre calha nos mesmos dias. Cada sessão tem um botão **⇄** que a troca de dia
-com outra da mesma semana — como todos os sete dias já têm sessão (treino, PT ou descanso),
-mover uma é sempre trocar duas, e a semana nunca fica com dias a dobrar nem vazios.
+O plano é um ponto de partida, não uma jaula. Cada sessão tem dois botões:
+
+| Botão | O que faz |
+|---|---|
+| ✎ | Editar: dia, tipo, título, indicações, ritmos, distância — e apagar a sessão |
+| ⇄ | Trocar de dia com outra sessão da mesma semana |
+
+No fim de cada semana há ainda **+ Acrescentar sessão**, para os treinos que o plano não
+previu. Um dia pode ficar com duas sessões ou com nenhuma.
 
 O que fica registado (distância, tempo, esforço, dor na canela) **acompanha a sessão**, não
-o dia: o registo é guardado com a data original do plano, e os ajustes são guardados à parte.
-Por isso é que *repor o plano original* devolve tudo ao sítio sem perder nada.
+o dia: o registo é guardado com a data original do plano, e as alterações ficam à parte, em
+mapas próprios (`ajustes`, `edicoes`, `removidas`, `extras`). Por isso é que
+**repor o plano original** devolve a semana inteira ao sítio — dias, conteúdos, sessões
+apagadas e sessões acrescentadas — sem tocar nos registos das sessões do plano.
 
 Há dois avisos, que assinalam mas não impedem:
 
 - **tira a longa de domingo** — a corrida longa ao domingo é a regra fixa do plano.
-- **dois treinos duros em dias seguidos** — aparece no topo da semana quando uma troca
-  deixa dois dias fortes colados.
+- **dois treinos duros seguidos** (ou no mesmo dia) — aparece no topo da semana.
 
-A prova não se move.
+A prova não se edita nem se move.
 
 ## Contagem dos treinos de PT
 

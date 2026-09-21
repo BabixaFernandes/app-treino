@@ -13,7 +13,10 @@ function estadoInicial() {
     versao: 1,
     alvos: { ...ALVOS_PADRAO },
     treinos: {},    // "2026-09-23": { feito, distanciaKm, tempoMin, esforco, dorCanela, notas }
-    ajustes: {},    // "2026-09-21": "2026-09-23" — sessão movida para outro dia
+    ajustes: {},    // "2026-09-21": "2026-09-23" — sessão do plano movida para outro dia
+    edicoes: {},    // "2026-09-23": { tipo, titulo, detalhe, passadeira, distanciaKm } — campos por cima do plano
+    removidas: {},  // "2026-09-23": true — sessão do plano apagada
+    extras: {},     // "x-1758...": { data, tipo, titulo, detalhe, passadeira, distanciaKm } — sessão criada por ela
     pesos: {},      // "2026-09-21": 95.2
     alimentos: [],  // { id, nome, kcal, p, h, g, cat }
     diario: {},     // "2026-09-21": [ { id, alimentoId, gramas, refeicao } ]
@@ -114,9 +117,62 @@ export function trocarSessoes(idA, idB) {
   });
 }
 
-/** Devolve as sessões indicadas aos dias originais do plano. */
-export function reporDias(ids) {
-  actualizar((e) => { ids.forEach((id) => delete e.ajustes[id]); });
+/** Move uma sessão do plano para outro dia, sem trocar com ninguém. */
+export function moverSessao(id, data) {
+  actualizar((e) => {
+    if (data === id) delete e.ajustes[id]; else e.ajustes[id] = data;
+  });
+}
+
+// ---- Editar, criar e apagar sessões ----
+
+/** Guarda por cima do plano só os campos que ela mudou. */
+export function editarSessao(id, campos) {
+  actualizar((e) => { e.edicoes[id] = { ...(e.edicoes[id] || {}), ...campos }; });
+}
+
+/** Sessão nova, que não existe no plano. Devolve o id criado. */
+export function criarSessao(dados) {
+  const id = `x-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+  actualizar((e) => { e.extras[id] = dados; });
+  return id;
+}
+
+/** Deita fora as alterações de conteúdo e devolve a sessão ao que o plano diz. */
+export function reporConteudo(id) {
+  actualizar((e) => { delete e.edicoes[id]; });
+}
+
+export function editarExtra(id, campos) {
+  actualizar((e) => { e.extras[id] = { ...(e.extras[id] || {}), ...campos }; });
+}
+
+/** Apaga uma sessão. As do plano ficam só marcadas, para poderem voltar. */
+export function apagarSessao(id) {
+  actualizar((e) => {
+    if (e.extras[id]) {
+      delete e.extras[id];
+      delete e.treinos[id];
+    } else {
+      e.removidas[id] = true;
+    }
+    delete e.ajustes[id];
+  });
+}
+
+/** Devolve uma semana ao plano original: dias, conteúdos, apagadas e sessões criadas. */
+export function reporSemana(idsPlano, idsExtra) {
+  actualizar((e) => {
+    idsPlano.forEach((id) => {
+      delete e.ajustes[id];
+      delete e.edicoes[id];
+      delete e.removidas[id];
+    });
+    idsExtra.forEach((id) => {
+      delete e.extras[id];
+      delete e.treinos[id];
+    });
+  });
 }
 
 // ---- Peso ----
