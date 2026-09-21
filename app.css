@@ -227,7 +227,15 @@ main { padding: 16px; max-width: 640px; margin: 0 auto; }
   padding: 5px 10px; border-radius: 8px; cursor: pointer; flex: none;
 }
 .copiar-balanco:active { background: var(--primaria); color: #06121f; }
-.balanco dl { margin: 10px 0 0; }
+.balanco .numeros { margin-top: 10px; }
+.balanco .numeros summary {
+  cursor: pointer; font-size: .74rem; font-weight: 600; color: var(--primaria);
+  list-style: none; padding: 3px 0;
+}
+.balanco .numeros summary::-webkit-details-marker { display: none; }
+.balanco .numeros summary::before { content: '▸ '; }
+.balanco .numeros[open] summary::before { content: '▾ '; }
+.balanco dl { margin: 6px 0 0; }
 .balanco dl > div {
   display: flex; gap: 10px; padding: 5px 0;
   border-bottom: 1px solid var(--borda); font-size: .8rem;
@@ -236,7 +244,7 @@ main { padding: 16px; max-width: 640px; margin: 0 auto; }
 .balanco dt { color: var(--texto-fraco); min-width: 84px; flex: none; }
 .balanco dd { margin: 0; font-weight: 600; }
 .recado {
-  margin: 10px 0 0; font-size: .8rem; line-height: 1.45;
+  margin: 9px 0 0; font-size: .8rem; line-height: 1.45;
   padding-left: 10px; border-left: 2px solid var(--borda);
 }
 .recado.bom { color: var(--verde); border-left-color: var(--verde); }

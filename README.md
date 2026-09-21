@@ -145,7 +145,11 @@ O que mostra: sessões feitas, a longa, o ritmo
 médio das corridas fáceis, registos de dor na canela, a média do peso contra a da semana
 anterior, e a média de calorias e proteína dos dias registados.
 
-Por baixo vêm **no máximo dois recados**, por esta ordem de prioridade:
+**Os números estão colapsados; o recado não.** Colapsar tudo mataria a razão de existir — era
+preciso abrir o cartão para descobrir que valia a pena abri-lo. Assim uma semana boa ocupa duas
+linhas e uma semana com problema grita à mesma.
+
+Vêm **no máximo dois recados**, por esta ordem de prioridade:
 
 1. **Dor na canela** — passa à frente de tudo, com a regra de paragem do plano.
 2. **A longa não feita** — a única sessão que não se salta.

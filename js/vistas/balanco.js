@@ -223,10 +223,13 @@ export function balancoHTML(semana, sessoes, fim, hoje) {
         <h5>${b.emCurso ? `Semana ${semana.semana}, até agora` : `Balanço da semana ${semana.semana}`}</h5>
         <button type="button" class="copiar-balanco" data-balanco="${semana.semana}">Copiar</button>
       </div>
-      <dl>
-        ${linhas(b).map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join('')}
-      </dl>
       ${veredictos(b).map((m) => `<p class="recado ${m.tom}">${m.texto}</p>`).join('')}
+      <details class="numeros">
+        <summary>Ver os números</summary>
+        <dl>
+          ${linhas(b).map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join('')}
+        </dl>
+      </details>
     </div>
   `;
 }
