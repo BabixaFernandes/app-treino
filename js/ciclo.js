@@ -10,8 +10,10 @@
 import { obter, somaDias } from './store.js';
 
 const CICLO_PADRAO = 28;
-const DIAS_MENSTRUACAO = 5;
+const MENSTRUACAO_PADRAO = 5;
 const CICLOS_PARA_PADRAO = 2;
+// Passados tantos dias sem fim marcado, deixa de fazer sentido oferecer "acabou hoje".
+const DIAS_PERIODO_ABERTO = 14;
 
 export const FASES = {
   menstruacao: { label: 'Menstruação', cor: 'vermelho' },
@@ -27,21 +29,37 @@ const diasEntre = (a, b) => Math.round((new Date(b) - new Date(a)) / 86400000);
 export function duracaoMedia() {
   const { ciclos } = obter();
   if (ciclos.length < 2) return { dias: CICLO_PADRAO, estimada: true, n: 0 };
-  const intervalos = ciclos.slice(1).map((d, i) => diasEntre(ciclos[i], d));
+  const intervalos = ciclos.slice(1).map((c, i) => diasEntre(ciclos[i].inicio, c.inicio));
   const media = intervalos.reduce((a, b) => a + b, 0) / intervalos.length;
   return { dias: Math.round(media), estimada: false, n: intervalos.length };
 }
 
-/** O último primeiro-dia que começou em ou antes de `data`. */
-function inicioAplicavel(data) {
-  const { ciclos } = obter();
-  return [...ciclos].reverse().find((d) => d <= data) || null;
+/** Quantos dias duram os períodos dela, dos que tiverem fim marcado. */
+export function duracaoPeriodo() {
+  const fechados = obter().ciclos.filter((c) => c.fim);
+  if (!fechados.length) return { dias: MENSTRUACAO_PADRAO, estimada: true, n: 0 };
+  const duracoes = fechados.map((c) => diasEntre(c.inicio, c.fim) + 1);
+  const media = duracoes.reduce((a, b) => a + b, 0) / duracoes.length;
+  return { dias: Math.round(media), estimada: false, n: fechados.length };
+}
+
+/** O último ciclo que começou em ou antes de `data`. */
+function cicloAplicavel(data) {
+  return [...obter().ciclos].reverse().find((c) => c.inicio <= data) || null;
+}
+
+/** O período que está a decorrer, se houver e se ainda fizer sentido fechá-lo. */
+export function periodoAberto(hoje) {
+  const c = cicloAplicavel(hoje);
+  if (!c || c.fim) return null;
+  return diasEntre(c.inicio, hoje) <= DIAS_PERIODO_ABERTO ? c : null;
 }
 
 /** Em que fase cai um dia. `null` quando não há dados para o saber. */
 export function faseDe(data) {
-  const inicio = inicioAplicavel(data);
-  if (!inicio) return null;
+  const ciclo = cicloAplicavel(data);
+  if (!ciclo) return null;
+  const inicio = ciclo.inicio;
 
   const { dias: duracao } = duracaoMedia();
   const dia = diasEntre(inicio, data) + 1;
@@ -49,14 +67,20 @@ export function faseDe(data) {
   // Muito depois do ciclo previsto, deixa de fazer sentido adivinhar.
   if (dia > duracao + 14) return null;
 
+  // Se o fim do período foi marcado, a menstruação é medida e não estimada.
+  const diasPeriodo = ciclo.fim ? diasEntre(inicio, ciclo.fim) + 1 : duracaoPeriodo().dias;
+
   const ovulacao = duracao - 14;
   let fase;
-  if (dia <= DIAS_MENSTRUACAO) fase = 'menstruacao';
+  if (dia <= diasPeriodo) fase = 'menstruacao';
   else if (dia < ovulacao - 1) fase = 'folicular';
   else if (dia <= ovulacao + 1) fase = 'ovulacao';
   else fase = 'lutea';
 
-  return { fase, dia, ...FASES[fase] };
+  const info = FASES[fase];
+  // A menstruação só é estimada enquanto o fim do período não estiver marcado.
+  const estimada = fase === 'menstruacao' ? !ciclo.fim : !!info.estimada;
+  return { fase, dia, label: info.label, cor: info.cor, estimada };
 }
 
 /** Quantos ciclos completos existem — dois primeiros dias seguidos fazem um ciclo. */

@@ -17,7 +17,7 @@ function estadoInicial() {
     edicoes: {},    // "2026-09-23": { tipo, titulo, detalhe, passadeira, distanciaKm } — campos por cima do plano
     extras: {},     // "x-1758...": { data, tipo, titulo, detalhe, passadeira, distanciaKm } — sessão criada por ela
     pesos: {},      // "2026-09-21": 95.2
-    ciclos: [],     // ["2026-09-18", ...] — primeiro dia de cada período, por ordem
+    ciclos: [],     // [{ inicio: "2026-09-18", fim: "2026-09-22" }] — fim null até ser marcado
     sintomas: {},   // "2026-09-19": { dores: 0-2, cansaco: 0-2, fluxo: 0-2 }
     alimentos: [],  // { id, nome, kcal, p, h, g, cat }
     diario: {},     // "2026-09-21": [ { id, alimentoId, gramas, refeicao } ]
@@ -32,7 +32,13 @@ function carregar() {
     const bruto = localStorage.getItem(CHAVE);
     if (!bruto) return semear(estadoInicial());
     const guardado = JSON.parse(bruto);
-    return { ...estadoInicial(), ...guardado, alvos: { ...ALVOS_PADRAO, ...(guardado.alvos || {}) } };
+    return {
+      ...estadoInicial(),
+      ...guardado,
+      alvos: { ...ALVOS_PADRAO, ...(guardado.alvos || {}) },
+      // Os ciclos começaram por ser só a data de início, em texto.
+      ciclos: (guardado.ciclos || []).map((c) => (typeof c === 'string' ? { inicio: c, fim: null } : c)),
+    };
   } catch {
     return semear(estadoInicial());
   }
@@ -215,9 +221,17 @@ export function mediaSemanal(data) {
 /** Marca (ou desmarca) um dia como primeiro dia de período. */
 export function alternarInicioCiclo(data) {
   actualizar((e) => {
-    e.ciclos = e.ciclos.includes(data)
-      ? e.ciclos.filter((d) => d !== data)
-      : [...e.ciclos, data].sort();
+    e.ciclos = e.ciclos.some((c) => c.inicio === data)
+      ? e.ciclos.filter((c) => c.inicio !== data)
+      : [...e.ciclos, { inicio: data, fim: null }].sort((a, b) => a.inicio.localeCompare(b.inicio));
+  });
+}
+
+/** Fecha o período em curso, ou reabre-o se `data` for null. */
+export function marcarFimCiclo(inicio, data) {
+  actualizar((e) => {
+    const c = e.ciclos.find((x) => x.inicio === inicio);
+    if (c) c.fim = data;
   });
 }
 

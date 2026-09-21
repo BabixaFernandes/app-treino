@@ -162,14 +162,23 @@ umas regras não conseguem dar. Se o telemóvel não deixar copiar, abre o texto
 
 ## Ciclo
 
-O separador **Ciclo** tem um botão para marcar o primeiro dia do período e, opcionalmente,
-dores / cansaço / fluxo em três níveis nos últimos três dias. Daí a app deriva a fase e mostra-a
-como etiqueta em cada sessão de treino, com o dia do ciclo no tooltip.
+O separador **Ciclo** tem dois botões — *o período começou hoje* e, enquanto houver um período
+aberto, *o período acabou hoje* — e, opcionalmente, dores / cansaço / fluxo em três níveis nos
+últimos três dias. Daí a app deriva a fase e mostra-a como etiqueta em cada sessão de treino,
+com o dia do ciclo no tooltip.
 
-A duração do ciclo sai da **média dos ciclos dela**, não dos 28 dias por omissão — assumir 28
-é um dos erros metodológicos que a literatura aponta. Sem dois períodos registados usa 28 e
-di-lo. As fases pós-menstruais levam asterisco, porque sem temperatura ou testes a ovulação
-é estimada.
+Nada é assumido quando pode ser medido:
+
+- **A duração do ciclo** sai da média dos ciclos dela, não dos 28 dias por omissão — assumir 28
+  é um dos erros metodológicos que a literatura aponta. Sem dois períodos registados usa 28 e di-lo.
+- **A duração da menstruação** sai dos períodos que tenham fim marcado. Sem nenhum, usa 5 dias e
+  a fase aparece com asterisco. Marcado o fim, a menstruação passa a medida e o asterisco cai —
+  e a fronteira entre menstruação e folicular muda em consequência.
+- As fases **pós-menstruais levam sempre asterisco**, porque sem temperatura ou testes a ovulação
+  é estimada e apresentá-la como facto seria desonesto.
+
+Na lista de períodos, a duração é clicável para reabrir um período fechado por erro. O `×` apaga
+o registo todo.
 
 ### Porque é que a app não muda os treinos por causa da fase
 

@@ -1,5 +1,11 @@
-import { obter, alternarInicioCiclo, registarSintomas, isoData, somaDias, diaCurto, dataLegivel } from '../store.js';
-import { faseDe, duracaoMedia, ciclosCompletos, faltamCiclos, padraoPorFase, FASES } from '../ciclo.js';
+import {
+  obter, alternarInicioCiclo, marcarFimCiclo, registarSintomas,
+  isoData, somaDias, diaCurto, dataLegivel,
+} from '../store.js';
+import {
+  faseDe, duracaoMedia, duracaoPeriodo, periodoAberto,
+  ciclosCompletos, faltamCiclos, padraoPorFase,
+} from '../ciclo.js';
 
 const SINTOMAS = [
   { chave: 'dores', label: 'Dores' },
@@ -15,7 +21,9 @@ export function renderCiclo(raiz) {
   const hoje = isoData();
   const fase = faseDe(hoje);
   const dur = duracaoMedia();
-  const comecouHoje = estado.ciclos.includes(hoje);
+  const per = duracaoPeriodo();
+  const comecouHoje = estado.ciclos.some((c) => c.inicio === hoje);
+  const aberto = periodoAberto(hoje);
 
   raiz.innerHTML = `
     <div class="destaque">
@@ -33,10 +41,17 @@ export function renderCiclo(raiz) {
       <button type="button" class="${comecouHoje ? 'secundario' : 'primario'} largo" id="marcar-inicio">
         ${comecouHoje ? 'Desmarcar — não começou hoje' : 'O período começou hoje'}
       </button>
+      ${aberto ? `
+        <button type="button" class="secundario largo" id="marcar-fim">
+          O período acabou hoje
+        </button>` : ''}
       <p class="legenda">
         ${dur.n
           ? `Os teus ciclos têm em média <strong>${dur.dias} dias</strong>, de ${dur.n} ${dur.n === 1 ? 'intervalo' : 'intervalos'} registados.`
           : 'Sem dois períodos registados, a app usa 28 dias como referência. Assim que tiver os teus, passa a usar a tua média.'}
+        ${per.n
+          ? `O período dura-te em média <strong>${per.dias} dias</strong>.`
+          : 'Enquanto não marcares o fim de um período, a menstruação é calculada com 5 dias — e as fases aparecem como estimadas.'}
       </p>
     </div>
 
@@ -68,6 +83,18 @@ export function renderCiclo(raiz) {
   raiz.querySelector('#marcar-inicio').addEventListener('click', () => {
     alternarInicioCiclo(hoje);
     renderCiclo(raiz);
+  });
+
+  raiz.querySelector('#marcar-fim')?.addEventListener('click', () => {
+    marcarFimCiclo(aberto.inicio, hoje);
+    renderCiclo(raiz);
+  });
+
+  raiz.querySelectorAll('[data-reabrir]').forEach((el) => {
+    el.addEventListener('click', () => {
+      marcarFimCiclo(el.dataset.reabrir, null);
+      renderCiclo(raiz);
+    });
   });
 
   raiz.querySelectorAll('[data-sintoma]').forEach((el) => {
@@ -169,14 +196,21 @@ function cartaoHistorico(estado) {
     <div class="cartao">
       <h4>Períodos registados</h4>
       <div class="lista-ciclos">
-        ${ordenados.map((d, i) => {
+        ${ordenados.map((c, i) => {
           const anterior = ordenados[i + 1];
-          const intervalo = anterior ? Math.round((new Date(d) - new Date(anterior)) / 86400000) : null;
+          const intervalo = anterior ? Math.round((new Date(c.inicio) - new Date(anterior.inicio)) / 86400000) : null;
+          const dias = c.fim ? Math.round((new Date(c.fim) - new Date(c.inicio)) / 86400000) + 1 : null;
           return `
             <div class="linha-ciclo">
-              <span>${dataLegivel(d)}</span>
+              <span>
+                ${dataLegivel(c.inicio)}
+                ${dias
+                  ? `<button type="button" class="duracao" data-reabrir="${c.inicio}"
+                       title="Marcar outra vez como não terminado">${dias} ${dias === 1 ? 'dia' : 'dias'}</button>`
+                  : '<em class="duracao aberto">fim não marcado</em>'}
+              </span>
               <span class="intervalo">${intervalo ? `${intervalo} dias depois` : 'primeiro registo'}</span>
-              <button type="button" class="apagar" data-apagar-ciclo="${d}" aria-label="Apagar">×</button>
+              <button type="button" class="apagar" data-apagar-ciclo="${c.inicio}" aria-label="Apagar">×</button>
             </div>`;
         }).join('')}
       </div>

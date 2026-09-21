@@ -182,8 +182,14 @@ main { padding: 16px; max-width: 640px; margin: 0 auto; }
   padding: 9px 0; border-bottom: 1px solid var(--borda); font-size: .85rem;
 }
 .linha-ciclo:last-child { border-bottom: none; }
-.linha-ciclo span:first-child { flex: 1; }
+.linha-ciclo span:first-child { flex: 1; display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
 .linha-ciclo .intervalo { color: var(--texto-fraco); font-size: .76rem; }
+.linha-ciclo .duracao {
+  font-style: normal; font-size: .68rem; font-weight: 600; font-family: inherit;
+  color: var(--vermelho); background: rgba(255, 95, 86, .13);
+  border: none; border-radius: 6px; padding: 2px 7px; cursor: pointer;
+}
+.linha-ciclo .duracao.aberto { color: var(--texto-fraco); background: var(--superficie-2); cursor: default; }
 
 .etiqueta-movida {
   font-size: .62rem; text-transform: uppercase; letter-spacing: .05em;
